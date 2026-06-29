@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhãn trái cây / Etikety na ovoce</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; }
+
+  .form-panel {
+    max-width: 700px; margin: 30px auto; background: #fff;
+    border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 30px;
+  }
+  .form-panel h1 { text-align: center; margin-bottom: 5px; font-size: 24px; color: #2d6a2e; }
+  .form-panel .subtitle { text-align: center; color: #888; margin-bottom: 18px; font-size: 14px; }
+
+  /* language switch */
+  .lang-switch { display: flex; justify-content: center; gap: 8px; margin-bottom: 18px; }
+  .lang-switch button {
+    padding: 5px 12px; border: 1.5px solid #ccc; background: #fff; color: #666;
+    border-radius: 20px; font-size: 13px; cursor: pointer; font-weight: 600;
+  }
+  .lang-switch button.active { border-color: #2d6a2e; background: #2d6a2e; color: #fff; }
+
+  .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+  .form-group { flex: 1; display: flex; flex-direction: column; }
+  .form-group label { font-weight: 600; margin-bottom: 4px; font-size: 13px; color: #555; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px;
+    font-size: 15px; transition: border-color 0.2s; font-family: inherit;
+  }
+  .form-group textarea { resize: vertical; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: #2d6a2e;
+  }
+  .note-warn {
+    display: none; margin-top: 5px; font-size: 12px; color: #b8860b;
+    background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 5px 8px;
+  }
+  .note-warn.show { display: block; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 12px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-add { background: #2d6a2e; color: #fff; } .btn-add:hover { background: #245623; }
+  .btn-print { background: #1a73e8; color: #fff; } .btn-print:hover { background: #1557b0; }
+  .btn-clear { background: #e8e8e8; color: #555; } .btn-clear:hover { background: #d0d0d0; }
+  .btn-remove { background: #e74c3c; color: #fff; padding: 4px 10px; font-size: 12px; border-radius: 5px; border: none; cursor: pointer; }
+
+  /* preview */
+  .preview-section { margin: 24px 0 0; padding-top: 16px; border-top: 1px solid #eee; }
+  .preview-section h2 { text-align: center; color: #555; margin-bottom: 15px; font-size: 18px; }
+  .label-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .label-preview { border: 1.5px solid #ccc; border-radius: 8px; padding: 8px 12px; background: #fff; width: 220px; font-size: 12px; position: relative; }
+  .label-preview .lp-name { font-weight: 700; font-size: 14px; color: #2d6a2e; margin-bottom: 3px; }
+  .label-preview .lp-origin { color: #888; font-size: 11px; margin-bottom: 5px; }
+  .label-preview .lp-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+  .label-preview .lp-price-big { font-size: 16px; font-weight: 700; color: #c0392b; text-align: center; margin-top: 4px; }
+  .label-preview .lp-price100 { text-align: center; font-size: 11px; color: #777; }
+  .label-preview .lp-note { text-align: center; font-size: 11px; color: #555; margin-top: 4px; font-style: italic; word-break: break-word; }
+  .label-preview .lp-count { position: absolute; top: 4px; right: 8px; background: #2d6a2e; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+  .label-preview .lp-actions { text-align: center; margin-top: 6px; }
+
+  .auto-price { padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 17px; font-weight: 700; color: #c0392b; background: #fafafa; min-height: 42px; display: flex; align-items: center; }
+
+  /* presets */
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+  .preset-chip { display: inline-flex; align-items: center; border: 1.5px solid #2d6a2e; border-radius: 20px; overflow: hidden; background: #fff; }
+  .preset-chip .preset-fill { border: none; background: transparent; color: #2d6a2e; font-size: 13px; padding: 6px 6px 6px 14px; cursor: pointer; font-weight: 600; }
+  .preset-chip .preset-del { border: none; background: transparent; color: #c0392b; font-size: 16px; line-height: 1; padding: 4px 10px 4px 4px; cursor: pointer; font-weight: 700; }
+  .preset-chip:hover { background: #f0f8f0; }
+  .preset-chip .preset-del:hover { color: #fff; background: #e74c3c; border-radius: 0 18px 18px 0; }
+  .preset-chip-add { border: 1.5px dashed #2d6a2e; border-radius: 20px; background: #f0f8f0; color: #2d6a2e; font-size: 13px; font-weight: 700; padding: 6px 16px; cursor: pointer; }
+  .preset-chip-add:hover { background: #2d6a2e; color: #fff; }
+  .preset-add-form { display: none; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; margin: 0 0 18px; padding: 12px; background: #f7faf7; border: 1.5px solid #cfe3d0; border-radius: 10px; }
+  .preset-add-form.show { display: flex; }
+  .preset-add-form input { padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; flex: 1; min-width: 120px; }
+  .preset-add-form button { padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .preset-add-form .pf-save { background: #2d6a2e; color: #fff; }
+  .preset-add-form .pf-cancel { background: #e8e8e8; color: #555; }
+
+  /* main row: fields | tracker */
+  .main-row { display: flex; gap: 20px; align-items: flex-start; }
+  .fields { flex: 1; min-width: 0; }
+  .fields .form-row:last-child { margin-bottom: 0; }
+
+  .tracker { width: 190px; flex-shrink: 0; padding: 10px; border: 1.5px solid #cfe3d0; border-radius: 10px; background: #fafdfa; }
+  .tracker-count { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1.5px dashed #cfe3d0; }
+  .tracker-count label { display: block; font-weight: 600; font-size: 12px; color: #555; text-align: center; margin-bottom: 4px; }
+  .tracker-count input { width: 100%; padding: 8px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; font-weight: 700; text-align: center; color: #2d6a2e; }
+  .tracker-count input:focus { outline: none; border-color: #2d6a2e; }
+  .tracker-title { font-weight: 700; color: #2d6a2e; font-size: 13px; text-align: center; margin-bottom: 2px; }
+  .tracker-layout { text-align: center; font-size: 10px; color: #777; margin-bottom: 8px; line-height: 1.25; white-space: normal; word-break: break-word; }
+  .tracker-grid { display: grid; gap: 3px; margin-bottom: 8px; max-width: 132px; margin-left: auto; margin-right: auto; }
+  .tcell { aspect-ratio: 2.3 / 1; border: 1.5px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; background: #fff; color: #999; user-select: none; }
+  .tcell.used { background: #e0e0e0; color: #bbb; text-decoration: line-through; }
+  .tcell.queued { background: #a5d6a7; color: #1b5e20; border-color: #2d6a2e; font-weight: 700; }
+  .tcell.next { background: #2d6a2e; color: #fff; border-color: #2d6a2e; box-shadow: 0 0 0 2px #a5d6a7; }
+  .tcell.free:hover { border-color: #2d6a2e; }
+  .tracker-next { text-align: center; font-size: 12px; color: #333; margin-bottom: 3px; }
+  .tracker-next b { color: #2d6a2e; font-size: 15px; }
+  .tracker-free { text-align: center; font-size: 10px; color: #888; margin-bottom: 8px; }
+  .tracker-controls { display: flex; gap: 4px; justify-content: center; }
+  .tracker-controls button { flex: 1; padding: 6px 2px; border: 1.5px solid #2d6a2e; background: #fff; color: #2d6a2e; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .tracker-controls button:hover { background: #2d6a2e; color: #fff; }
+  .tracker-hint { text-align: center; font-size: 9px; color: #aaa; margin-top: 6px; }
+
+  /* modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); max-width: 460px; width: 90%; padding: 28px; }
+  .modal h2 { text-align: center; color: #2d6a2e; font-size: 20px; margin-bottom: 6px; }
+  .modal .modal-layout { text-align: center; font-size: 15px; font-weight: 700; color: #333; background: #e8f5e9; border-radius: 8px; padding: 8px; margin-bottom: 16px; }
+  .modal table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .modal td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+  .modal td:first-child { font-weight: 600; color: #555; width: 55%; }
+  .modal td:last-child { font-weight: 700; color: #2d6a2e; }
+  .modal .modal-warn { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #856404; margin-bottom: 16px; text-align: center; }
+  .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  .modal-btns button { padding: 10px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .modal-btn-print { background: #1a73e8; color: #fff; }
+  .modal-btn-cancel { background: #e8e8e8; color: #555; }
+
+  /* mobile */
+  @media (max-width: 600px) {
+    .form-panel { margin: 12px; padding: 18px 16px; border-radius: 10px; }
+    .form-panel h1 { font-size: 20px; }
+    .main-row { flex-direction: column; gap: 16px; }
+    .tracker { width: 100%; }
+    .form-row { flex-direction: column; gap: 12px; }
+    .btn-row { flex-direction: column; }
+    .btn { width: 100%; padding: 14px; font-size: 16px; }
+    .form-group input, .form-group select, .form-group textarea { font-size: 16px; padding: 12px; }
+    .auto-price { font-size: 16px; }
+    .label-preview { width: 100%; max-width: 320px; }
+    .modal { padding: 20px 16px; }
+    .modal-btns { flex-direction: column; }
+    .modal-btns button { width: 100%; }
+  }
+
+  /* print */
+  #printPage { display: none; }
+  @media print {
+    body { background: #fff; }
+    .form-panel, .preview-section, .no-print { display: none !important; }
+    #printPage { display: block !important; }
+    @page { size: A4; margin: 0; }
+  }
+  .print-page { width: 210mm; height: 297mm; margin: 0 auto; page-break-after: always; overflow: hidden; }
+  .print-page:last-child { page-break-after: avoid; }
+  .print-grid { width: 210mm; display: flex; flex-wrap: wrap; align-content: flex-start; }
+  .print-label { overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; }
+</style>
+</head>
+<body>
+
+<div class="form-panel">
+  <div class="lang-switch">
+    <button id="langVi" onclick="setLang('vi')">🇻🇳 Tiếng Việt</button>
+    <button id="langCs" onclick="setLang('cs')">🇨🇿 Čeština</button>
+  </div>
+
+  <h1 data-i18n="title">Nhãn trái cây</h1>
+  <p class="subtitle" data-i18n="subtitle">In nhãn giá lên giấy decal A4</p>
+
+  <div class="presets" id="presets"></div>
+  <div class="preset-add-form" id="presetAddForm">
+    <input type="text" id="newPresetName" data-i18n-ph="presetNamePh">
+    <input type="text" id="newPresetOrigin" data-i18n-ph="presetOriginPh">
+    <button class="pf-save" onclick="confirmAddPreset()" data-i18n="save">Lưu</button>
+    <button class="pf-cancel" onclick="toggleAddPreset(false)" data-i18n="cancel">Hủy</button>
+  </div>
+
+  <div class="main-row">
+    <div class="fields">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fname" data-i18n="fname">Tên trái cây</label>
+          <input type="text" id="fname" data-i18n-ph="fnamePh" oninput="checkNote()">
+        </div>
+        <div class="form-group">
+          <label for="forigin" data-i18n="forigin">Xuất xứ (nước)</label>
+          <input type="text" id="forigin" data-i18n-ph="foriginPh">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fpricekg" data-i18n="fpricekg">Giá mỗi kg (Kč)</label>
+          <input type="number" id="fpricekg" step="0.01" min="0" data-i18n-ph="fpricekgPh" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label for="fweight" data-i18n="fweight">Cân nặng (kg)</label>
+          <input type="number" id="fweight" step="0.01" min="0" data-i18n-ph="fweightPh" oninput="autoCalc()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="price100g">Giá mỗi 100g (Kč)</label>
+          <div class="auto-price" id="autoPrice100g">—</div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="priceKus">Giá mỗi miếng (Kč) — tự động</label>
+          <div class="auto-price" id="autoPriceKus">—</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="flayout" data-i18n="layout">Khổ giấy nhãn</label>
+          <select id="flayout" onchange="onLayoutChange()"></select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fnote" data-i18n="note">Ghi chú — hướng dẫn (tùy chọn)</label>
+          <textarea id="fnote" rows="2" data-i18n-ph="notePh" oninput="checkNote()"></textarea>
+          <div class="note-warn" id="noteWarn"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tracker" id="tracker">
+      <div class="tracker-count">
+        <label for="fcount" data-i18n="count">Số lượng nhãn</label>
+        <input type="number" id="fcount" value="1" min="1" max="100">
+      </div>
+      <div class="tracker-title" data-i18n="posTitle">📍 Vị trí in</div>
+      <div class="tracker-layout" id="trackerLayout"></div>
+      <div class="tracker-grid" id="trackerGrid"></div>
+      <div class="tracker-next"><span data-i18n="nextLbl">Tiếp:</span> <b id="nextPosLabel">#1</b></div>
+      <div class="tracker-free" id="trackerFree"></div>
+      <div class="tracker-controls">
+        <button onclick="adjustPos(-1)" id="btnPrev">◀</button>
+        <button onclick="resetPos()" id="btnReset" data-i18n="btnReset">Tờ mới</button>
+        <button onclick="adjustPos(1)" id="btnNext">▶</button>
+      </div>
+      <div class="tracker-hint" data-i18n="posHint">Bấm vào ô để chọn vị trí bắt đầu</div>
+    </div>
+  </div>
+
+  <div class="preview-section" id="previewSection">
+    <h2 id="previewHeading"></h2>
+    <div class="label-list" id="labelList"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-add" onclick="addLabel()" data-i18n="addLabel">Thêm nhãn</button>
+    <button class="btn btn-print" onclick="printLabels()" data-i18n="print">In</button>
+    <button class="btn btn-clear" onclick="clearAll()" data-i18n="clearAll">Xóa hết</button>
+  </div>
+</div>
+
+<!-- PRINT SETTINGS MODAL -->
+<div class="modal-overlay" id="printModal">
+  <div class="modal">
+    <h2 data-i18n="modalTitle">Cài đặt in</h2>
+    <div class="modal-layout" id="modalLayout"></div>
+    <table>
+      <tr><td data-i18n="mPaper">Khổ giấy</td><td>A4</td></tr>
+      <tr><td data-i18n="mOrient">Hướng giấy</td><td data-i18n="mOrientVal">Dọc</td></tr>
+      <tr><td data-i18n="mMargin">Lề</td><td data-i18n="mMarginVal">Không (None)</td></tr>
+      <tr><td data-i18n="mScale">Tỉ lệ</td><td>100%</td></tr>
+      <tr><td data-i18n="mPages">Số trang</td><td id="modalPages"></td></tr>
+      <tr><td data-i18n="mCount">Số nhãn</td><td id="modalCount"></td></tr>
+      <tr><td data-i18n="mStart">Vị trí bắt đầu</td><td id="modalStart"></td></tr>
+    </table>
+    <div class="modal-warn" id="modalWarn" data-i18n="modalWarn"></div>
+    <div class="modal-btns">
+      <button class="modal-btn-print" onclick="confirmPrint()" data-i18n="print">In</button>
+      <button class="modal-btn-cancel" onclick="closePrintModal()" data-i18n="cancel">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<div id="printPage"></div>
+
+<script>
+  // ===== i18n =====
+  const STR = {
+    vi: {
+      htmlLang: 'vi', docTitle: 'Nhãn trái cây',
+      title: 'Nhãn trái cây', subtitle: 'In nhãn giá lên giấy decal A4',
+      fname: 'Tên trái cây', fnamePh: 'vd. Dưa hấu',
+      forigin: 'Xuất xứ (nước)', foriginPh: 'vd. Tây Ban Nha',
+      fpricekg: 'Giá mỗi kg (Kč)', fpricekgPh: 'vd. 24.90',
+      fweight: 'Cân nặng (kg)', fweightPh: 'vd. 5.2',
+      price100g: 'Giá mỗi 100g (Kč)', priceKus: 'Giá mỗi miếng (Kč) — tự động',
+      layout: 'Khổ giấy nhãn', recommended: '(khuyên dùng)',
+      note: 'Ghi chú — hướng dẫn (tùy chọn)', notePh: 'vd. Bảo quản nơi mát, dùng trong 3 ngày',
+      count: 'Số lượng nhãn', posTitle: '📍 Vị trí in', nextLbl: 'Tiếp:',
+      btnReset: 'Tờ mới', prevTitle: 'Vị trí trước', resetTitle: 'Tờ giấy mới', nextTitle: 'Vị trí sau',
+      posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
+      previewTitle: 'Xem trước nhãn', unit: 'cái',
+      addLabel: 'Thêm nhãn', print: 'In', clearAll: 'Xóa hết',
+      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Xoài)', presetOriginPh: 'Xuất xứ (vd. Brazil)',
+      save: 'Lưu', cancel: 'Hủy', del: 'Xóa', remove: 'Bỏ',
+      free: 'Còn trống', willPrint: 'sẽ in',
+      nameShort: 'tên', noteShort: 'ghi chú', chars: 'ký tự', of: 'trên',
+      modalTitle: 'Cài đặt in', mPaper: 'Khổ giấy', mOrient: 'Hướng giấy', mOrientVal: 'Dọc',
+      mMargin: 'Lề', mMarginVal: 'Không (None)', mScale: 'Tỉ lệ', mPages: 'Số trang', mCount: 'Số nhãn', mStart: 'Vị trí bắt đầu',
+      modalWarn: '⚠️ Trong hộp thoại in hãy đặt: Khổ giấy = A4, Lề = Không (None), Tỉ lệ = 100%. Nếu không, nhãn sẽ lệch ô!',
+      pages: 'trang',
+      needName: 'Hãy nhập tên trái cây.', needWeight: 'Hãy nhập cân nặng.', needPrice: 'Hãy nhập giá mỗi kg.',
+      longConfirm: 'Chữ dài hơn khổ nhãn – cỡ chữ sẽ tự thu nhỏ để vừa.\n\nTiếp tục?',
+      nothingPrint: 'Chưa có nhãn nào để in.\n\nHãy điền thông tin rồi bấm "Thêm nhãn", hoặc điền form rồi bấm In.',
+      confirmClear: 'Xóa tất cả nhãn?', presetExists: 'Trái cây này đã có trong danh sách.',
+      warnPrefix: '⚠️ Chữ dài:', warnSuffix: '— cỡ chữ trên nhãn sẽ tự thu nhỏ để vừa.',
+    },
+    cs: {
+      htmlLang: 'cs', docTitle: 'Etikety na ovoce',
+      title: 'Etikety na ovoce', subtitle: 'Tisk etiket s cenami na samolepicí papír A4',
+      fname: 'Název ovoce', fnamePh: 'např. Vodní meloun',
+      forigin: 'Původ (země)', foriginPh: 'např. Španělsko',
+      fpricekg: 'Cena za kg (Kč)', fpricekgPh: 'např. 24.90',
+      fweight: 'Hmotnost (kg)', fweightPh: 'např. 5.2',
+      price100g: 'Cena za 100g (Kč)', priceKus: 'Cena za kus (Kč) — automaticky',
+      layout: 'Rozložení etiket', recommended: '(doporučeno)',
+      note: 'Poznámka — návod (nepovinné)', notePh: 'např. Skladujte v chladu, spotřebujte do 3 dnů',
+      count: 'Počet etiket', posTitle: '📍 Pozice tisku', nextLbl: 'Další:',
+      btnReset: 'Nový', prevTitle: 'Předchozí pozice', resetTitle: 'Nový čistý arch', nextTitle: 'Další pozice',
+      posHint: 'Klikněte na pole pro start',
+      previewTitle: 'Náhled etiket', unit: 'ks',
+      addLabel: 'Přidat etiketu', print: 'Tisknout', clearAll: 'Smazat vše',
+      addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetOriginPh: 'Původ (např. Brazílie)',
+      save: 'Uložit', cancel: 'Zrušit', del: 'Smazat', remove: 'Odebrat',
+      free: 'Volných na archu', willPrint: 'vytiskne se',
+      nameShort: 'název', noteShort: 'poznámka', chars: 'znaků', of: 'z',
+      modalTitle: 'Nastavení tisku', mPaper: 'Formát papíru', mOrient: 'Orientace', mOrientVal: 'Na výšku',
+      mMargin: 'Okraje', mMarginVal: 'Žádné (None)', mScale: 'Měřítko', mPages: 'Počet stránek', mCount: 'Počet etiket', mStart: 'Začít od pozice',
+      modalWarn: '⚠️ V dialogu tisku nastavte: Formát = A4, Okraje = Žádné (None), Měřítko = 100%. Jinak etikety nebudou na správné pozici!',
+      pages: 'stránka/stránky',
+      needName: 'Vyplňte název ovoce.', needWeight: 'Vyplňte hmotnost.', needPrice: 'Vyplňte cenu za kg.',
+      longConfirm: 'Text je delší než velikost etikety – písmo bude automaticky zmenšeno, aby se vešlo.\n\nPokračovat?',
+      nothingPrint: 'Nejsou žádné etikety k tisku.\n\nNejprve vyplňte údaje a klikněte na „Přidat etiketu", nebo vyplňte formulář a stiskněte Tisknout.',
+      confirmClear: 'Opravdu smazat všechny etikety?', presetExists: 'Toto ovoce už v seznamu je.',
+      warnPrefix: '⚠️ Dlouhý text:', warnSuffix: '— písmo bude na etiketě zmenšeno, aby se vešlo.',
+    }
+  };
+
+  // ===== LAYOUTS (na arch -> mřížka). Text NA ETIKETĚ je vždy česky (čte ho zákazník v ČR). =====
+  const LAYOUTS = {
+    '4':  { label: 'A4 105 × 148,5 mm – 4ks',  cols: 2, rows: 2, w: 105, h: 148.5, nameF: 26, originF: 14, detF: 13, bigF: 36, p100F: 12, noteF: 12, nameMax: 26, noteMax: 150 },
+    '8':  { label: 'A4 105 × 74 mm – 8ks',     cols: 2, rows: 4, w: 105, h: 74,    nameF: 18, originF: 11, detF: 12, bigF: 26, p100F: 11, noteF: 10, nameMax: 24, noteMax: 90 },
+    '10': { label: 'A4 105 × 57 mm – 10ks',    cols: 2, rows: 5, w: 105, h: 57,    nameF: 16, originF: 10, detF: 11, bigF: 22, p100F: 10, noteF: 9,  nameMax: 23, noteMax: 65 },
+    '12': { label: 'A4 105 × 48 mm – 12ks',    cols: 2, rows: 6, w: 105, h: 48,    nameF: 14, originF: 9,  detF: 10, bigF: 19, p100F: 9,  noteF: 8,  nameMax: 22, noteMax: 50 },
+    '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 11, originF: 7,  detF: 8,  bigF: 14, p100F: 7,  noteF: 6,  nameMax: 16, noteMax: 34 },
+    '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 10, originF: 7,  detF: 8,  bigF: 13, p100F: 7,  noteF: 6,  nameMax: 15, noteMax: 30 },
+    '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 7,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 26 },
+  };
+  const DEFAULT_LAYOUT = '12';
+  const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko']];
+
+  // localStorage (může být blokováno přes file://)
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+
+  let lang = (STR[store.get('etikety_lang')]) ? store.get('etikety_lang') : 'vi';
+  let L = STR[lang];
+  let labels = loadLabels();
+  let presets = loadPresets();
+  let nextPos = parseInt(store.get('etikety_nextpos')) || 1;
+
+  function loadLabels() { try { const s = JSON.parse(store.get('etikety_labels')); return Array.isArray(s) ? s : []; } catch (e) { return []; } }
+  function saveLabels() { store.set('etikety_labels', JSON.stringify(labels)); }
+  function loadPresets() { try { const s = JSON.parse(store.get('etikety_presets')); if (Array.isArray(s)) return s; } catch (e) {} return DEFAULT_PRESETS.map(p => [p[0], p[1]]); }
+  function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
+
+  // ===== INIT / LANGUAGE =====
+  function init() {
+    buildLayoutOptions();
+    document.getElementById('flayout').value = LAYOUTS[store.get('etikety_layout')] ? store.get('etikety_layout') : DEFAULT_LAYOUT;
+    applyLang();
+    clampPos();
+    renderPresets();
+    renderTracker();
+    renderPreview();
+  }
+
+  function buildLayoutOptions() {
+    const sel = document.getElementById('flayout');
+    const cur = sel.value;
+    sel.innerHTML = Object.keys(LAYOUTS).map(k => {
+      const rec = k === '12' ? ' ' + L.recommended : '';
+      return `<option value="${k}">${LAYOUTS[k].label}${rec}</option>`;
+    }).join('');
+    if (cur) sel.value = cur;
+  }
+
+  function setLang(l) {
+    if (!STR[l]) return;
+    lang = l; L = STR[l];
+    store.set('etikety_lang', l);
+    applyLang();
+  }
+
+  function applyLang() {
+    document.documentElement.lang = L.htmlLang;
+    document.title = L.docTitle;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.getAttribute('data-i18n')]; });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = L[el.getAttribute('data-i18n-ph')]; });
+    document.getElementById('btnPrev').title = L.prevTitle;
+    document.getElementById('btnReset').title = L.resetTitle;
+    document.getElementById('btnNext').title = L.nextTitle;
+    document.getElementById('langVi').classList.toggle('active', lang === 'vi');
+    document.getElementById('langCs').classList.toggle('active', lang === 'cs');
+    buildLayoutOptions();
+    renderPresets();
+    renderTracker();
+    renderPreview();
+    checkNote();
+  }
+
+  function curLayout() { return document.getElementById('flayout').value; }
+  function perPage() { const c = LAYOUTS[curLayout()]; return c.cols * c.rows; }
+
+  function fillPreset(name, origin) {
+    document.getElementById('fname').value = name;
+    document.getElementById('forigin').value = origin;
+    document.getElementById('fpricekg').focus();
+    checkNote();
+  }
+
+  // ===== PRESETS =====
+  function renderPresets() {
+    let html = presets.map((p, i) =>
+      `<span class="preset-chip">
+        <button class="preset-fill" onclick="fillPreset('${esc(p[0])}','${esc(p[1])}')">${esc(p[0])}</button>
+        <button class="preset-del" onclick="removePreset(${i})" title="${L.del}">×</button>
+      </span>`
+    ).join('');
+    html += `<button class="preset-chip-add" onclick="toggleAddPreset(true)">${L.addPreset}</button>`;
+    document.getElementById('presets').innerHTML = html;
+  }
+  function removePreset(i) { presets.splice(i, 1); savePresets(); renderPresets(); }
+  function toggleAddPreset(show) {
+    const f = document.getElementById('presetAddForm');
+    f.classList.toggle('show', show);
+    if (show) { document.getElementById('newPresetName').value = ''; document.getElementById('newPresetOrigin').value = ''; document.getElementById('newPresetName').focus(); }
+  }
+  function confirmAddPreset() {
+    const name = document.getElementById('newPresetName').value.trim();
+    const origin = document.getElementById('newPresetOrigin').value.trim();
+    if (!name) { alert(L.needName); return; }
+    if (presets.some(p => p[0].toLowerCase() === name.toLowerCase())) { alert(L.presetExists); return; }
+    presets.push([name, origin]); savePresets(); renderPresets(); toggleAddPreset(false);
+  }
+
+  function formatCzech(num) { return num.toFixed(2).replace('.', ','); }
+
+  function autoCalc() {
+    const priceKg = parseFloat(document.getElementById('fpricekg').value);
+    const weight = parseFloat(document.getElementById('fweight').value);
+    const elKus = document.getElementById('autoPriceKus');
+    const el100g = document.getElementById('autoPrice100g');
+    if (!isNaN(priceKg) && !isNaN(weight) && weight > 0 && priceKg > 0) {
+      elKus.textContent = formatCzech(priceKg * weight) + ' Kč';
+      el100g.textContent = formatCzech(priceKg / 10) + ' Kč';
+    } else {
+      elKus.textContent = '—';
+      el100g.textContent = (!isNaN(priceKg) && priceKg > 0) ? formatCzech(priceKg / 10) + ' Kč' : '—';
+    }
+  }
+
+  function addLabel() {
+    const name = document.getElementById('fname').value.trim();
+    const origin = document.getElementById('forigin').value.trim();
+    const weight = parseFloat(document.getElementById('fweight').value);
+    const priceKg = parseFloat(document.getElementById('fpricekg').value);
+    const note = document.getElementById('fnote').value.trim();
+    const count = parseInt(document.getElementById('fcount').value) || 1;
+
+    if (!name) { alert(L.needName); return; }
+    if (isNaN(weight) || weight <= 0) { alert(L.needWeight); return; }
+    if (isNaN(priceKg) || priceKg <= 0) { alert(L.needPrice); return; }
+
+    const cfg = LAYOUTS[curLayout()];
+    if (note.length > cfg.noteMax || name.length > cfg.nameMax) {
+      if (!confirm(L.longConfirm)) return;
+    }
+
+    const priceKus = priceKg * weight;
+    const per100g = priceKg / 10;
+    for (let i = 0; i < count; i++) labels.push({ name, origin, weight, priceKg, price: priceKus, per100g, note });
+    saveLabels();
+
+    document.getElementById('fname').value = '';
+    document.getElementById('forigin').value = '';
+    document.getElementById('fweight').value = '';
+    document.getElementById('fpricekg').value = '';
+    document.getElementById('fnote').value = '';
+    document.getElementById('fcount').value = '1';
+    document.getElementById('autoPriceKus').textContent = '—';
+    document.getElementById('autoPrice100g').textContent = '—';
+    checkNote();
+    renderPreview();
+    renderTracker();
+  }
+
+  function clearAll() {
+    if (labels.length === 0) return;
+    if (confirm(L.confirmClear)) { labels = []; saveLabels(); renderPreview(); renderTracker(); }
+  }
+
+  function renderPreview() {
+    const list = document.getElementById('labelList');
+    document.getElementById('previewHeading').textContent = `${L.previewTitle} (${labels.length} ${L.unit})`;
+    const grouped = {};
+    labels.forEach((l) => {
+      const key = `${l.name}|${l.origin}|${l.weight}|${l.priceKg}|${l.note || ''}`;
+      if (!grouped[key]) grouped[key] = { ...l, count: 0 };
+      grouped[key].count++;
+    });
+    let html = '';
+    for (const key in grouped) {
+      const g = grouped[key];
+      html += `
+        <div class="label-preview">
+          <div class="lp-count">${g.count}×</div>
+          <div class="lp-name">${esc(g.name)}</div>
+          <div class="lp-origin">${esc(g.origin)}</div>
+          <div class="lp-row"><span>${L.fweight}</span><span>${formatCzech(g.weight)} kg</span></div>
+          <div class="lp-row"><span>${L.fpricekg}</span><span>${formatCzech(g.priceKg)} Kč</span></div>
+          <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
+          <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
+          ${g.note ? `<div class="lp-note">📝 ${esc(g.note)}</div>` : ''}
+          <div class="lp-actions"><button class="btn-remove" onclick="removeGroup('${esc(key)}')">${L.remove}</button></div>
+        </div>`;
+    }
+    list.innerHTML = html;
+  }
+  function removeGroup(key) {
+    labels = labels.filter(l => `${l.name}|${l.origin}|${l.weight}|${l.priceKg}|${l.note || ''}` !== key);
+    saveLabels(); renderPreview(); renderTracker();
+  }
+
+  function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+  // ===== POSITION TRACKER =====
+  function clampPos() { const pp = perPage(); if (nextPos < 1) nextPos = 1; if (nextPos > pp) nextPos = pp; savePos(); }
+  function savePos() { store.set('etikety_nextpos', nextPos); store.set('etikety_layout', curLayout()); }
+  function onLayoutChange() { clampPos(); renderTracker(); checkNote(); }
+  function setStartPos(n) { nextPos = n; clampPos(); renderTracker(); }
+  function adjustPos(d) { const pp = perPage(); nextPos += d; if (nextPos < 1) nextPos = pp; if (nextPos > pp) nextPos = 1; savePos(); renderTracker(); }
+  function resetPos() { nextPos = 1; savePos(); renderTracker(); }
+
+  function renderTracker() {
+    const cfg = LAYOUTS[curLayout()];
+    const pp = cfg.cols * cfg.rows;
+    const queued = labels.length;
+    const queueEnd = nextPos + queued - 1;
+    document.getElementById('trackerLayout').textContent = cfg.label;
+    document.getElementById('nextPosLabel').textContent = '#' + nextPos;
+    const grid = document.getElementById('trackerGrid');
+    grid.style.gridTemplateColumns = `repeat(${cfg.cols}, 1fr)`;
+    let html = '';
+    for (let i = 1; i <= pp; i++) {
+      let cls = 'free';
+      if (i < nextPos) cls = 'used';
+      else if (queued > 0 && i >= nextPos && i <= queueEnd) cls = 'queued';
+      else if (queued === 0 && i === nextPos) cls = 'next';
+      html += `<div class="tcell ${cls}" onclick="setStartPos(${i})">${i}</div>`;
+    }
+    grid.innerHTML = html;
+    const free = pp - (nextPos - 1);
+    let info = `${L.free}: ${free} / ${pp}`;
+    if (queued > 0) info += ` • ${L.willPrint} ${queued} ${L.unit}`;
+    document.getElementById('trackerFree').textContent = info;
+  }
+
+  // ===== PRINT (text na etiketě vždy česky) =====
+  function fitFont(text, maxChars, baseFont, minFont) {
+    if (!text || text.length <= maxChars) return baseFont;
+    return Math.max(minFont, +(baseFont * maxChars / text.length).toFixed(1));
+  }
+  function renderPrintCell(l, cfg) {
+    const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
+    if (!l) return `<div class="print-label" style="${base}"></div>`;
+    const nameFont = fitFont(l.name, cfg.nameMax, cfg.nameF, Math.max(7, cfg.nameF * 0.6));
+    const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
+    const noteHtml = l.note ? `<div style="text-align:center;font-size:${noteFont}pt;color:#333;margin-top:0.5mm;line-height:1.1;white-space:normal;word-break:break-word;font-style:italic;">${esc(l.note)}</div>` : '';
+    return `<div class="print-label" style="${base}padding:2mm 4mm;">
+      <div style="font-weight:700;text-align:center;font-size:${nameFont}pt;line-height:1.05;word-break:break-word;">${esc(l.name)}</div>
+      <div style="text-align:center;color:#333;font-size:${cfg.originF}pt;">Původ: ${esc(l.origin)}</div>
+      <div style="display:flex;justify-content:space-between;font-size:${cfg.detF}pt;margin-top:0.5mm;"><span>${formatCzech(l.weight)} kg</span><span>${formatCzech(l.priceKg)} Kč/kg</span></div>
+      <div style="text-align:center;font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.5mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
+      <div style="text-align:center;font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
+      ${noteHtml}
+    </div>`;
+  }
+
+  function printLabels() {
+    if (labels.length === 0) {
+      const name = document.getElementById('fname').value.trim();
+      const weight = parseFloat(document.getElementById('fweight').value);
+      const priceKg = parseFloat(document.getElementById('fpricekg').value);
+      if (name && weight > 0 && priceKg > 0) addLabel();
+    }
+    if (labels.length === 0) { alert(L.nothingPrint); return; }
+    const cfg = LAYOUTS[curLayout()];
+    const pp = cfg.cols * cfg.rows;
+    const totalPages = Math.ceil((nextPos - 1 + labels.length) / pp);
+    document.getElementById('modalLayout').textContent = cfg.label;
+    document.getElementById('modalPages').textContent = totalPages + ' ' + L.pages;
+    document.getElementById('modalCount').textContent = labels.length + ' ' + L.unit;
+    document.getElementById('modalStart').textContent = '#' + nextPos + ' ' + L.of + ' ' + pp;
+    document.getElementById('printModal').classList.add('show');
+  }
+  function closePrintModal() { document.getElementById('printModal').classList.remove('show'); }
+
+  function confirmPrint() {
+    closePrintModal();
+    const cfg = LAYOUTS[curLayout()];
+    const pp = cfg.cols * cfg.rows;
+    const offset = nextPos - 1;
+    const padTop = Math.max(0, (297 - cfg.rows * cfg.h) / 2);
+    const cells = [];
+    for (let i = 0; i < offset; i++) cells.push(null);
+    labels.forEach(l => cells.push(l));
+    while (cells.length % pp !== 0) cells.push(null);
+    let html = '';
+    for (let p = 0; p < cells.length / pp; p++) {
+      const pageCells = cells.slice(p * pp, (p + 1) * pp);
+      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;">`;
+      pageCells.forEach(c => { html += renderPrintCell(c, cfg); });
+      html += `</div></div>`;
+    }
+    document.getElementById('printPage').innerHTML = html;
+    nextPos = ((nextPos - 1 + labels.length) % pp) + 1;
+    labels = [];
+    saveLabels(); savePos(); renderPreview(); renderTracker();
+    setTimeout(() => { window.print(); }, 200);
+  }
+
+  // ===== Live warning when text is too long =====
+  function checkNote() {
+    const cfg = LAYOUTS[curLayout()];
+    const note = document.getElementById('fnote').value;
+    const name = document.getElementById('fname').value;
+    const warn = document.getElementById('noteWarn');
+    const msgs = [];
+    if (name.length > cfg.nameMax) msgs.push(`${L.nameShort} (${name.length}/${cfg.nameMax} ${L.chars})`);
+    if (note.length > cfg.noteMax) msgs.push(`${L.noteShort} (${note.length}/${cfg.noteMax} ${L.chars})`);
+    if (msgs.length) { warn.textContent = `${L.warnPrefix} ${msgs.join(', ')} ${L.warnSuffix}`; warn.classList.add('show'); }
+    else warn.classList.remove('show');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.closest('.fields .form-group')) addLabel();
+  });
+
+  init();
+</script>
+</body>
+</html>
