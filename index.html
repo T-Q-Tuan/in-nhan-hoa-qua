@@ -98,8 +98,8 @@
   .pf-toggle input:checked + .pf-switch { background: #2d6a2e; }
   .pf-toggle input:checked + .pf-switch::after { left: 18px; }
   .pf-toggle.off { color: #888; }
-  .pf-hint { font-size: 11px; color: #666; padding: 6px 10px; background: #e8f5e9; border-radius: 6px; width: 100%; }
-  .pf-hint.warn { background: #fdecea; color: #c0392b; border: 1px solid #f5c6c2; }
+  .pf-hint { font-size: 11px; color: #c0392b; padding: 6px 10px; background: #fdecea; border:1px solid #f5c6c2; border-radius: 6px; width: 100%; display:none; }
+  .pf-hint.show { display: block; }
   .preset-chip .preset-bc { font-size: 10px; color: #888; padding: 0 6px; border-left: 1px solid #ddd; font-family: 'Consolas', monospace; }
   .preset-chip .preset-bc.off { text-decoration: line-through; }
   .label-preview .lp-barcode { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 4px; }
@@ -200,11 +200,13 @@
       <input type="text" id="newPresetOrigin" data-i18n-ph="presetOriginPh">
       <input type="text" id="newPresetBarcode" data-i18n-ph="presetBarcodePh" maxlength="20" oninput="onPresetBarcodeInput()">
     </div>
-    <label class="pf-toggle" id="pfToggle">
-      <input type="checkbox" id="newPresetUseBC" checked onchange="onToggleBarcode()">
-      <span class="pf-switch"></span>
-      <span id="pfToggleLabel" data-i18n="useBarcode">Dùng mã vạch</span>
-    </label>
+    <div class="pf-row" style="justify-content:flex-start;">
+      <label class="pf-toggle" id="pfToggle">
+        <input type="checkbox" id="newPresetUseBC" checked onchange="onToggleBarcode()">
+        <span class="pf-switch"></span>
+        <span id="pfToggleLabel" data-i18n="useBarcode">Dùng mã vạch</span>
+      </label>
+    </div>
     <div class="pf-hint" id="pfHint"></div>
     <div class="pf-row" style="justify-content:flex-end;">
       <button class="pf-save" onclick="confirmAddPreset()" data-i18n="save">Lưu</button>
@@ -314,7 +316,7 @@
       posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
       previewTitle: 'Xem trước nhãn', unit: 'cái',
       addLabel: 'Thêm nhãn', print: 'In', clearAll: 'Xóa hết',
-      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Xoài)', presetOriginPh: 'Xuất xứ (vd. Brazil)', presetBarcodePh: 'Mã vạch',
+      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Mango)', presetOriginPh: 'Xuất xứ (vd. Anglie)', presetBarcodePh: 'Mã vạch',
       useBarcode: 'Dùng mã vạch', noBarcode: 'Không dùng mã vạch',
       bcHintSuggest: 'Gợi ý mã từ tên — bạn có thể sửa.', bcHintOff: 'Mặt hàng này sẽ không có mã vạch khi in.',
       bcHintDuplicate: 'Mã này đã dùng cho', bcHintShort: 'Mã quá ngắn (cần tối thiểu 4 ký tự để máy quét đọc được).',
@@ -515,13 +517,13 @@
   function updatePresetHint() {
     const hint = document.getElementById('pfHint');
     const on = document.getElementById('newPresetUseBC').checked;
-    if (!on) { hint.className = 'pf-hint'; hint.textContent = '💡 ' + L.bcHintOff; return; }
+    if (!on) { hint.className = 'pf-hint'; hint.textContent = ''; return; }
     const code = document.getElementById('newPresetBarcode').value.trim().toUpperCase();
-    if (code.length > 0 && code.length < 4) { hint.className = 'pf-hint warn'; hint.textContent = '⚠️ ' + L.bcHintShort; return; }
+    if (code.length > 0 && code.length < 4) { hint.className = 'pf-hint show'; hint.textContent = '⚠️ ' + L.bcHintShort; return; }
     const dup = presets.find(p => (p[2] || '').toUpperCase() === code && code);
-    if (dup) { hint.className = 'pf-hint warn'; hint.textContent = '⚠️ ' + L.bcHintDuplicate + ' "' + dup[0] + '"'; return; }
+    if (dup) { hint.className = 'pf-hint show'; hint.textContent = '⚠️ ' + L.bcHintDuplicate + ' "' + dup[0] + '"'; return; }
     hint.className = 'pf-hint';
-    hint.textContent = '💡 ' + L.bcHintSuggest;
+    hint.textContent = '';
   }
 
   // ===== PRESETS =====
