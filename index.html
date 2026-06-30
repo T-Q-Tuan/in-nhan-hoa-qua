@@ -59,10 +59,10 @@
   .label-preview .lp-name { font-weight: 700; font-size: 14px; color: #2d6a2e; margin-bottom: 3px; text-align: center; }
   .label-preview .lp-origin { color: #888; font-size: 11px; margin-bottom: 5px; text-align: center; }
   .label-preview .lp-line { text-align: center; font-size: 12px; color: #444; margin-bottom: 2px; }
-  .label-preview .lp-twocol { display: flex; gap: 12px; }
-  .label-preview .lp-left { flex: 1.3; text-align: left; min-width: 0; }
+  .label-preview .lp-twocol { display: flex; gap: 10px; }
+  .label-preview .lp-left { flex: 0 0 65%; text-align: left; min-width: 0; }
   .label-preview .lp-left .lp-name, .label-preview .lp-left .lp-origin, .label-preview .lp-left .lp-price-big, .label-preview .lp-left .lp-price100 { text-align: left; }
-  .label-preview .lp-right { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: left; min-width: 0; }
+  .label-preview .lp-right { flex: 0 0 35%; display: flex; flex-direction: column; justify-content: flex-start; text-align: left; min-width: 0; }
   .label-preview .lp-grid { display: grid; grid-template-columns: max-content max-content; column-gap: 6px; row-gap: 1px; font-size: 11px; color: #444; margin-bottom: 2px; }
   .label-preview .lp-grid span:nth-child(odd) { color: #888; }
   .label-preview .lp-note-h { font-size: 10px; color: #888; margin-bottom: 2px; }
@@ -377,13 +377,13 @@
 
   // ===== LAYOUTS (na arch -> mřížka). Text NA ETIKETĚ je vždy česky (čte ho zákazník v ČR). =====
   const LAYOUTS = {
-    '4':  { label: 'A4 105 × 148,5 mm – 4ks',  cols: 2, rows: 2, w: 105, h: 148.5, nameF: 30, originF: 16, detF: 15, bigF: 42, p100F: 14, noteF: 12, nameMax: 26, noteMax: 500, bcW: 60, bcH: 18, bcFont: 11 },
-    '8':  { label: 'A4 105 × 74 mm – 8ks',     cols: 2, rows: 4, w: 105, h: 74,    nameF: 21, originF: 13, detF: 14, bigF: 30, p100F: 13, noteF: 10, nameMax: 24, noteMax: 300, bcW: 45, bcH: 11, bcFont: 8 },
-    '10': { label: 'A4 105 × 57 mm – 10ks',    cols: 2, rows: 5, w: 105, h: 57,    nameF: 19, originF: 12, detF: 13, bigF: 26, p100F: 12, noteF: 9,  nameMax: 23, noteMax: 250, bcW: 40, bcH: 9,  bcFont: 7 },
-    '12': { label: 'A4 105 × 48 mm – 12ks',    cols: 2, rows: 6, w: 105, h: 48,    nameF: 16, originF: 11, detF: 12, bigF: 22, p100F: 11, noteF: 8,  nameMax: 22, noteMax: 220, bcW: 38, bcH: 8,  bcFont: 7 },
-    '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 13, originF: 8,  detF: 9,  bigF: 17, p100F: 8,  noteF: 6,  nameMax: 16, noteMax: 350, bcW: 25, bcH: 7,  bcFont: 6 },
-    '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 12, originF: 8,  detF: 9,  bigF: 15, p100F: 8,  noteF: 6,  nameMax: 15, noteMax: 170, bcW: 25, bcH: 6,  bcFont: 6 },
-    '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 11, originF: 7,  detF: 8,  bigF: 14, p100F: 7,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 25, bcH: 5,  bcFont: 5 },
+    '4':  { label: 'A4 105 × 148,5 mm – 4ks',  cols: 2, rows: 2, w: 105, h: 148.5, nameF: 38, originF: 20, detF: 19, bigF: 52, p100F: 17, noteF: 12, nameMax: 26, noteMax: 500, bcW: 55, bcH: 18, bcFont: 11 },
+    '8':  { label: 'A4 105 × 74 mm – 8ks',     cols: 2, rows: 4, w: 105, h: 74,    nameF: 27, originF: 16, detF: 17, bigF: 37, p100F: 16, noteF: 10, nameMax: 24, noteMax: 300, bcW: 42, bcH: 11, bcFont: 8 },
+    '10': { label: 'A4 105 × 57 mm – 10ks',    cols: 2, rows: 5, w: 105, h: 57,    nameF: 24, originF: 14, detF: 16, bigF: 32, p100F: 14, noteF: 9,  nameMax: 23, noteMax: 250, bcW: 38, bcH: 9,  bcFont: 7 },
+    '12': { label: 'A4 105 × 48 mm – 12ks',    cols: 2, rows: 6, w: 105, h: 48,    nameF: 20, originF: 13, detF: 14, bigF: 27, p100F: 13, noteF: 8,  nameMax: 22, noteMax: 220, bcW: 36, bcH: 8,  bcFont: 7 },
+    '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 17, originF: 11, detF: 11, bigF: 22, p100F: 11, noteF: 6,  nameMax: 16, noteMax: 350, bcW: 23, bcH: 7,  bcFont: 6 },
+    '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 16, originF: 10, detF: 11, bigF: 20, p100F: 10, noteF: 6,  nameMax: 15, noteMax: 170, bcW: 23, bcH: 6,  bcFont: 6 },
+    '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 14, originF: 9,  detF: 10, bigF: 18, p100F: 9,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 23, bcH: 5,  bcFont: 5 },
   };
   const DEFAULT_LAYOUT = '21';
   const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01']];
@@ -679,14 +679,10 @@
               <div class="lp-grid"><span>Hmotnost</span><span>${formatCzech(g.weight)} kg</span><span>Cena za kg</span><span>${formatCzech(g.priceKg)} Kč</span></div>
               <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
               <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
+              ${bcBlock}
             </div>
             <div class="lp-right">
-              <div class="lp-right-split">
-                <div class="lp-note-block">
-                  <div class="lp-note-b">${esc(g.note)}</div>
-                </div>
-                <div class="lp-bc-block">${bcBlock}</div>
-              </div>
+              <div class="lp-note-b">${esc(g.note)}</div>
             </div>
           </div>
           ${del}
@@ -711,16 +707,13 @@
       } else if (g.barcode) {
         html += `
         <div class="label-preview">${count}
-          <div class="lp-twocol">
-            <div class="lp-left">
-              <div class="lp-name">${esc(g.name)}</div>
-              <div class="lp-origin">Země původu: ${esc(g.origin)}</div>
-              <div class="lp-grid"><span>Hmotnost</span><span>${formatCzech(g.weight)} kg</span><span>Cena za kg</span><span>${formatCzech(g.priceKg)} Kč</span></div>
-              <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
-              <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
-            </div>
-            <div class="lp-right" style="justify-content:flex-end;">${bcBlock}</div>
-          </div>
+          <div class="lp-name">${esc(g.name)}</div>
+          <div class="lp-origin">Země původu: ${esc(g.origin)}</div>
+          <div class="lp-line">Hmotnost: ${formatCzech(g.weight)} kg</div>
+          <div class="lp-line">Cena za kg: ${formatCzech(g.priceKg)} Kč</div>
+          <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
+          <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
+          ${bcBlock}
           ${del}
         </div>`;
       } else {
@@ -814,33 +807,31 @@
 
     if (hasNote && hasBC) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
-      const headF = Math.max(6, cfg.originF - 1);
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;gap:3mm;">
-        <div style="flex:1.3;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
-            <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
-          </div>
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 2mm 2mm 3mm;gap:2mm;">
+        <div style="flex:0 0 70%;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
           <div style="padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
             ${bcSvg(l.barcode, cfg)}
           </div>
+        </div>
+        <div style="flex:0 0 30%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">
+          <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
         </div>
       </div>`;
     }
     if (hasNote) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
-      const headF = Math.max(6, cfg.originF - 1);
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;gap:3mm;">
-        <div style="flex:1.3;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:left;overflow:hidden;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 2mm 2mm 3mm;gap:2mm;">
+        <div style="flex:0 0 70%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
+        <div style="flex:0 0 30%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">
           <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
         </div>
       </div>`;
     }
     if (hasBC) {
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;gap:3mm;">
-        <div style="flex:1.3;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;overflow:hidden;">
+      return `<div class="print-label" style="${base}padding:2mm 3mm;align-items:stretch;">
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
+        <div style="padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
           ${bcSvg(l.barcode, cfg)}
         </div>
       </div>`;
