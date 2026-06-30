@@ -791,19 +791,26 @@
   function renderPrintCell(l, cfg) {
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
     if (!l) return `<div class="print-label" style="${base}"></div>`;
-    const nameFont = cfg.nameF;
+    // Shrink whole info cluster proportionally only if name exceeds 45 chars
+    const NAME_LIMIT = 45;
+    const scale = l.name.length > NAME_LIMIT ? +(NAME_LIMIT / l.name.length).toFixed(3) : 1;
+    const nameFont = +(cfg.nameF * scale).toFixed(1);
+    const originFont = +(cfg.originF * scale).toFixed(1);
+    const detFont = +(cfg.detF * scale).toFixed(1);
+    const bigFont = +(cfg.bigF * scale).toFixed(1);
+    const p100Font = +(cfg.p100F * scale).toFixed(1);
     const hasNote = !!l.note;
     const hasBC = !!l.barcode;
 
     const infoLeft = `
       <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
-      <div style="color:#333;font-size:${cfg.originF}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
-      <div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0.2mm;font-size:${cfg.detF}pt;line-height:1.25;">
+      <div style="color:#333;font-size:${originFont}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
+      <div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0.2mm;font-size:${detFont}pt;line-height:1.25;">
         <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
         <span>Cena za kg</span><span>${formatCzech(l.priceKg)} Kč</span>
       </div>
-      <div style="font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.6mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
-      <div style="font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>`;
+      <div style="font-weight:800;font-size:${bigFont}pt;margin-top:0.6mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
+      <div style="font-size:${p100Font}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>`;
 
     if (hasNote && hasBC) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
@@ -839,11 +846,11 @@
 
     return `<div class="print-label" style="${base}padding:2mm 4mm;text-align:center;">
       <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
-      <div style="color:#333;font-size:${cfg.originF}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
-      <div style="font-size:${cfg.detF}pt;line-height:1.25;">Hmotnost: ${formatCzech(l.weight)} kg</div>
-      <div style="font-size:${cfg.detF}pt;line-height:1.25;">Cena za kg: ${formatCzech(l.priceKg)} Kč</div>
-      <div style="font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.8mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
-      <div style="font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
+      <div style="color:#333;font-size:${originFont}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
+      <div style="font-size:${detFont}pt;line-height:1.25;">Hmotnost: ${formatCzech(l.weight)} kg</div>
+      <div style="font-size:${detFont}pt;line-height:1.25;">Cena za kg: ${formatCzech(l.priceKg)} Kč</div>
+      <div style="font-weight:800;font-size:${bigFont}pt;margin-top:0.8mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
+      <div style="font-size:${p100Font}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
     </div>`;
   }
 
