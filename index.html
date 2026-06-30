@@ -791,7 +791,7 @@
   function renderPrintCell(l, cfg) {
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
     if (!l) return `<div class="print-label" style="${base}"></div>`;
-    const nameFont = fitFont(l.name, cfg.nameMax, cfg.nameF, Math.max(7, cfg.nameF * 0.6));
+    const nameFont = cfg.nameF;
     const hasNote = !!l.note;
     const hasBC = !!l.barcode;
 
