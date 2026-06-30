@@ -76,7 +76,8 @@
   .auto-price { padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 17px; font-weight: 700; color: #c0392b; background: #fafafa; min-height: 42px; display: flex; align-items: center; }
 
   /* presets */
-  .presets { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; }
+  .preset-add-row { display: flex; justify-content: center; margin-bottom: 14px; }
   .preset-chip { display: inline-flex; align-items: center; border: 1.5px solid #2d6a2e; border-radius: 20px; overflow: hidden; background: #fff; }
   .preset-chip .preset-fill { border: none; background: transparent; color: #2d6a2e; font-size: 13px; padding: 6px 6px 6px 14px; cursor: pointer; font-weight: 600; }
   .preset-chip .preset-del { border: none; background: transparent; color: #c0392b; font-size: 16px; line-height: 1; padding: 4px 10px 4px 4px; cursor: pointer; font-weight: 700; }
@@ -196,6 +197,9 @@
   <p class="subtitle" data-i18n="subtitle">In nhãn giá lên giấy decal A4</p>
 
   <div class="presets" id="presets"></div>
+  <div class="preset-add-row" id="presetAddRow">
+    <button class="preset-chip-add" id="addPresetBtn" onclick="toggleAddPreset(true)" data-i18n="addPreset">+ Thêm</button>
+  </div>
   <div class="preset-add-form" id="presetAddForm">
     <div class="pf-row">
       <input type="text" id="newPresetName" data-i18n-ph="presetNamePh" oninput="onPresetNameInput()">
@@ -533,7 +537,7 @@
 
   // ===== PRESETS =====
   function renderPresets() {
-    let html = presets.map((p, i) => {
+    const html = presets.map((p, i) => {
       const bc = p[2] || '';
       const bcHtml = bc
         ? `<span class="preset-bc">${esc(bc)}</span>`
@@ -544,13 +548,13 @@
         <button class="preset-del" onclick="removePreset(${i})" title="${L.del}">×</button>
       </span>`;
     }).join('');
-    html += `<button class="preset-chip-add" onclick="toggleAddPreset(true)">${L.addPreset}</button>`;
     document.getElementById('presets').innerHTML = html;
   }
   function removePreset(i) { presets.splice(i, 1); savePresets(); renderPresets(); }
   function toggleAddPreset(show) {
     const f = document.getElementById('presetAddForm');
     f.classList.toggle('show', show);
+    document.getElementById('presetAddRow').style.display = show ? 'none' : 'flex';
     if (show) {
       document.getElementById('newPresetName').value = '';
       document.getElementById('newPresetOrigin').value = '';
