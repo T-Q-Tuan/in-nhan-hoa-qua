@@ -406,6 +406,7 @@
   // ===== INIT / LANGUAGE =====
   function init() {
     buildLayoutOptions();
+    if (!store.get('etikety_reset_v2')) { store.set('etikety_layout', DEFAULT_LAYOUT); store.set('etikety_reset_v2', '1'); }
     document.getElementById('flayout').value = LAYOUTS[store.get('etikety_layout')] ? store.get('etikety_layout') : DEFAULT_LAYOUT;
     applyLang();
     clampPos();
