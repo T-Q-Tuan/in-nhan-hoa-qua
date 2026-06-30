@@ -40,6 +40,8 @@
     background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 5px 8px;
   }
   .note-warn.show { display: block; }
+  .note-warn.error { color: #c0392b; background: #fdecea; border-color: #f5c6c2; font-weight: 600; }
+  .form-group textarea.error, .form-group input.error { border-color: #e74c3c; background: #fef6f5; }
 
   .btn-row { display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
   .btn { padding: 12px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
@@ -332,6 +334,7 @@
       nothingPrint: 'Chưa có nhãn nào để in.\n\nHãy điền thông tin rồi bấm "Thêm nhãn", hoặc điền form rồi bấm In.',
       confirmClear: 'Xóa tất cả nhãn?', presetExists: 'Trái cây này đã có trong danh sách.',
       warnPrefix: '⚠️ Chữ dài:', warnSuffix: '— cỡ chữ trên nhãn sẽ tự thu nhỏ để vừa.',
+      noteExceedPrefix: '🛑 Ghi chú vượt quá giới hạn:', noteExceedSuffix: 'ký tự — hãy xóa bớt để có thể in.',
     },
     cs: {
       htmlLang: 'cs', docTitle: 'Cenovky',
@@ -364,6 +367,7 @@
       nothingPrint: 'Nejsou žádné etikety k tisku.\n\nNejprve vyplňte údaje a klikněte na „Přidat etiketu", nebo vyplňte formulář a stiskněte Tisknout.',
       confirmClear: 'Opravdu smazat všechny etikety?', presetExists: 'Toto ovoce už v seznamu je.',
       warnPrefix: '⚠️ Dlouhý text:', warnSuffix: '— písmo bude na etiketě zmenšeno, aby se vešlo.',
+      noteExceedPrefix: '🛑 Poznámka přesahuje limit:', noteExceedSuffix: 'znaků — zkraťte text pro tisk.',
     }
   };
 
@@ -611,7 +615,12 @@
     if (isNaN(priceKg) || priceKg <= 0) { alert(L.needPrice); return; }
 
     const cfg = LAYOUTS[curLayout()];
-    if (note.length > cfg.noteMax || name.length > cfg.nameMax) {
+    if (note.length > cfg.noteMax) {
+      alert(`${L.noteExceedPrefix} ${note.length}/${cfg.noteMax} ${L.noteExceedSuffix}`);
+      document.getElementById('fnote').focus();
+      return;
+    }
+    if (name.length > cfg.nameMax) {
       if (!confirm(L.longConfirm)) return;
     }
 
@@ -895,9 +904,17 @@
     const note = document.getElementById('fnote').value;
     const name = document.getElementById('fname').value;
     const warn = document.getElementById('noteWarn');
+    const noteEl = document.getElementById('fnote');
+    const noteOver = note.length > cfg.noteMax;
+    noteEl.classList.toggle('error', noteOver);
+    if (noteOver) {
+      warn.classList.add('show', 'error');
+      warn.textContent = `${L.noteExceedPrefix} ${note.length}/${cfg.noteMax} ${L.noteExceedSuffix}`;
+      return;
+    }
+    warn.classList.remove('error');
     const msgs = [];
     if (name.length > cfg.nameMax) msgs.push(`${L.nameShort} (${name.length}/${cfg.nameMax} ${L.chars})`);
-    if (note.length > cfg.noteMax) msgs.push(`${L.noteShort} (${note.length}/${cfg.noteMax} ${L.chars})`);
     if (msgs.length) { warn.textContent = `${L.warnPrefix} ${msgs.join(', ')} ${L.warnSuffix}`; warn.classList.add('show'); }
     else warn.classList.remove('show');
   }
