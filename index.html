@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nhãn giá / Cenovky</title>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.code128.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; }
@@ -84,9 +85,29 @@
   .preset-add-form { display: none; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; margin: 0 0 18px; padding: 12px; background: #f7faf7; border: 1.5px solid #cfe3d0; border-radius: 10px; }
   .preset-add-form.show { display: flex; }
   .preset-add-form input { padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; flex: 1; min-width: 120px; }
+  .preset-add-form input.suggested { border-style: dashed; border-color: #2d6a2e; background: #f0f8f0; color: #2d6a2e; font-weight: 600; letter-spacing: 1px; }
+  .preset-add-form input:disabled { background: #f0f0f0; color: #aaa; border-style: solid; font-weight: 400; letter-spacing: 0; }
   .preset-add-form button { padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
   .preset-add-form .pf-save { background: #2d6a2e; color: #fff; }
   .preset-add-form .pf-cancel { background: #e8e8e8; color: #555; }
+  .preset-add-form .pf-row { width: 100%; display: flex; gap: 8px; flex-wrap: wrap; }
+  .pf-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #2d6a2e; font-weight: 600; cursor: pointer; user-select: none; }
+  .pf-toggle .pf-switch { width: 36px; height: 20px; background: #ccc; border-radius: 10px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .pf-toggle .pf-switch::after { content: ''; width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left 0.2s; }
+  .pf-toggle input { display: none; }
+  .pf-toggle input:checked + .pf-switch { background: #2d6a2e; }
+  .pf-toggle input:checked + .pf-switch::after { left: 18px; }
+  .pf-toggle.off { color: #888; }
+  .pf-hint { font-size: 11px; color: #666; padding: 6px 10px; background: #e8f5e9; border-radius: 6px; width: 100%; }
+  .pf-hint.warn { background: #fdecea; color: #c0392b; border: 1px solid #f5c6c2; }
+  .preset-chip .preset-bc { font-size: 10px; color: #888; padding: 0 6px; border-left: 1px solid #ddd; font-family: 'Consolas', monospace; }
+  .preset-chip .preset-bc.off { text-decoration: line-through; }
+  .label-preview .lp-barcode { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 4px; }
+  .label-preview .lp-barcode svg { max-width: 100%; height: 28px; }
+  .label-preview .lp-bc-text { font-size: 10px; color: #555; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+  .label-preview .lp-right-split { display: flex; flex-direction: column; height: 100%; }
+  .label-preview .lp-right-split .lp-note-block { flex: 1; padding-bottom: 4px; }
+  .label-preview .lp-right-split .lp-bc-block { border-top: 1px dashed #999; padding-top: 4px; }
 
   /* main row: fields | tracker */
   .main-row { display: flex; gap: 20px; align-items: flex-start; }
@@ -174,10 +195,21 @@
 
   <div class="presets" id="presets"></div>
   <div class="preset-add-form" id="presetAddForm">
-    <input type="text" id="newPresetName" data-i18n-ph="presetNamePh">
-    <input type="text" id="newPresetOrigin" data-i18n-ph="presetOriginPh">
-    <button class="pf-save" onclick="confirmAddPreset()" data-i18n="save">Lưu</button>
-    <button class="pf-cancel" onclick="toggleAddPreset(false)" data-i18n="cancel">Hủy</button>
+    <div class="pf-row">
+      <input type="text" id="newPresetName" data-i18n-ph="presetNamePh" oninput="onPresetNameInput()">
+      <input type="text" id="newPresetOrigin" data-i18n-ph="presetOriginPh">
+      <input type="text" id="newPresetBarcode" data-i18n-ph="presetBarcodePh" maxlength="20" oninput="onPresetBarcodeInput()">
+    </div>
+    <label class="pf-toggle" id="pfToggle">
+      <input type="checkbox" id="newPresetUseBC" checked onchange="onToggleBarcode()">
+      <span class="pf-switch"></span>
+      <span id="pfToggleLabel" data-i18n="useBarcode">Dùng mã vạch</span>
+    </label>
+    <div class="pf-hint" id="pfHint"></div>
+    <div class="pf-row" style="justify-content:flex-end;">
+      <button class="pf-save" onclick="confirmAddPreset()" data-i18n="save">Lưu</button>
+      <button class="pf-cancel" onclick="toggleAddPreset(false)" data-i18n="cancel">Hủy</button>
+    </div>
   </div>
 
   <div class="main-row">
@@ -282,7 +314,10 @@
       posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
       previewTitle: 'Xem trước nhãn', unit: 'cái',
       addLabel: 'Thêm nhãn', print: 'In', clearAll: 'Xóa hết',
-      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Xoài)', presetOriginPh: 'Xuất xứ (vd. Brazil)',
+      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Xoài)', presetOriginPh: 'Xuất xứ (vd. Brazil)', presetBarcodePh: 'Mã vạch',
+      useBarcode: 'Dùng mã vạch', noBarcode: 'Không dùng mã vạch',
+      bcHintSuggest: 'Gợi ý mã từ tên — bạn có thể sửa.', bcHintOff: 'Mặt hàng này sẽ không có mã vạch khi in.',
+      bcHintDuplicate: 'Mã này đã dùng cho', bcHintShort: 'Mã quá ngắn (cần tối thiểu 4 ký tự để máy quét đọc được).',
       save: 'Lưu', cancel: 'Hủy', del: 'Xóa', remove: 'Bỏ',
       free: 'Còn trống', willPrint: 'sẽ in',
       nameShort: 'tên', noteShort: 'ghi chú', chars: 'ký tự', of: 'trên',
@@ -311,7 +346,10 @@
       posHint: 'Klikněte na pole pro start',
       previewTitle: 'Náhled etiket', unit: 'ks',
       addLabel: 'Přidat etiketu', print: 'Tisknout', clearAll: 'Smazat vše',
-      addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetOriginPh: 'Původ (např. Brazílie)',
+      addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetOriginPh: 'Původ (např. Brazílie)', presetBarcodePh: 'Čárový kód',
+      useBarcode: 'Použít čárový kód', noBarcode: 'Bez čárového kódu',
+      bcHintSuggest: 'Návrh kódu z názvu — můžete upravit.', bcHintOff: 'Tato položka nebude mít čárový kód při tisku.',
+      bcHintDuplicate: 'Tento kód už používá', bcHintShort: 'Kód je příliš krátký (minimálně 4 znaky pro čtečku).',
       save: 'Uložit', cancel: 'Zrušit', del: 'Smazat', remove: 'Odebrat',
       free: 'Volných na archu', willPrint: 'vytiskne se',
       nameShort: 'název', noteShort: 'poznámka', chars: 'znaků', of: 'z',
@@ -329,16 +367,16 @@
 
   // ===== LAYOUTS (na arch -> mřížka). Text NA ETIKETĚ je vždy česky (čte ho zákazník v ČR). =====
   const LAYOUTS = {
-    '4':  { label: 'A4 105 × 148,5 mm – 4ks',  cols: 2, rows: 2, w: 105, h: 148.5, nameF: 26, originF: 14, detF: 13, bigF: 36, p100F: 12, noteF: 12, nameMax: 26, noteMax: 150 },
-    '8':  { label: 'A4 105 × 74 mm – 8ks',     cols: 2, rows: 4, w: 105, h: 74,    nameF: 18, originF: 11, detF: 12, bigF: 26, p100F: 11, noteF: 10, nameMax: 24, noteMax: 90 },
-    '10': { label: 'A4 105 × 57 mm – 10ks',    cols: 2, rows: 5, w: 105, h: 57,    nameF: 16, originF: 10, detF: 11, bigF: 22, p100F: 10, noteF: 9,  nameMax: 23, noteMax: 65 },
-    '12': { label: 'A4 105 × 48 mm – 12ks',    cols: 2, rows: 6, w: 105, h: 48,    nameF: 14, originF: 9,  detF: 10, bigF: 19, p100F: 9,  noteF: 8,  nameMax: 22, noteMax: 50 },
-    '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 11, originF: 7,  detF: 8,  bigF: 14, p100F: 7,  noteF: 6,  nameMax: 16, noteMax: 34 },
-    '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 10, originF: 7,  detF: 8,  bigF: 13, p100F: 7,  noteF: 6,  nameMax: 15, noteMax: 30 },
-    '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 7,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 26 },
+    '4':  { label: 'A4 105 × 148,5 mm – 4ks',  cols: 2, rows: 2, w: 105, h: 148.5, nameF: 26, originF: 14, detF: 13, bigF: 36, p100F: 12, noteF: 12, nameMax: 26, noteMax: 150, bcW: 60, bcH: 18, bcFont: 11 },
+    '8':  { label: 'A4 105 × 74 mm – 8ks',     cols: 2, rows: 4, w: 105, h: 74,    nameF: 18, originF: 11, detF: 12, bigF: 26, p100F: 11, noteF: 10, nameMax: 24, noteMax: 90,  bcW: 45, bcH: 11, bcFont: 8 },
+    '10': { label: 'A4 105 × 57 mm – 10ks',    cols: 2, rows: 5, w: 105, h: 57,    nameF: 16, originF: 10, detF: 11, bigF: 22, p100F: 10, noteF: 9,  nameMax: 23, noteMax: 65,  bcW: 40, bcH: 9,  bcFont: 7 },
+    '12': { label: 'A4 105 × 48 mm – 12ks',    cols: 2, rows: 6, w: 105, h: 48,    nameF: 14, originF: 9,  detF: 10, bigF: 19, p100F: 9,  noteF: 8,  nameMax: 22, noteMax: 50,  bcW: 38, bcH: 8,  bcFont: 7 },
+    '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 11, originF: 7,  detF: 8,  bigF: 14, p100F: 7,  noteF: 6,  nameMax: 16, noteMax: 34,  bcW: 25, bcH: 7,  bcFont: 6 },
+    '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 10, originF: 7,  detF: 8,  bigF: 13, p100F: 7,  noteF: 6,  nameMax: 15, noteMax: 30,  bcW: 25, bcH: 6,  bcFont: 6 },
+    '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 7,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 26,  bcW: 25, bcH: 5,  bcFont: 5 },
   };
   const DEFAULT_LAYOUT = '21';
-  const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko']];
+  const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01']];
 
   // localStorage (může být blokováno přes file://)
   const store = {
@@ -354,7 +392,13 @@
 
   function loadLabels() { try { const s = JSON.parse(store.get('etikety_labels')); return Array.isArray(s) ? s : []; } catch (e) { return []; } }
   function saveLabels() { store.set('etikety_labels', JSON.stringify(labels)); }
-  function loadPresets() { try { const s = JSON.parse(store.get('etikety_presets')); if (Array.isArray(s)) return s; } catch (e) {} return DEFAULT_PRESETS.map(p => [p[0], p[1]]); }
+  function loadPresets() {
+    try {
+      const s = JSON.parse(store.get('etikety_presets'));
+      if (Array.isArray(s)) return s.map(p => [p[0], p[1] || '', (p[2] !== undefined) ? p[2] : suggestBarcodeFromName(p[0], [])]);
+    } catch (e) {}
+    return DEFAULT_PRESETS.map(p => [p[0], p[1], p[2]]);
+  }
   function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
 
   // ===== INIT / LANGUAGE =====
@@ -412,14 +456,87 @@
     checkNote();
   }
 
+  // ===== BARCODE SUGGESTION =====
+  function normalizeName(s) {
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9 ]/g, '');
+  }
+  function suggestBarcodeFromName(name, excludePresets) {
+    const norm = normalizeName(name).trim();
+    if (!norm) return '';
+    const words = norm.split(/\s+/).filter(Boolean);
+    const VOWELS = 'AEIOUY';
+    let prefix;
+    if (words.length >= 2) {
+      prefix = (words[0][0] || 'X') + (words[1][0] || 'X');
+    } else {
+      const w = words[0];
+      let c1 = w[0] || 'X', c2 = '';
+      for (let i = 1; i < w.length; i++) {
+        if (!VOWELS.includes(w[i])) { c2 = w[i]; break; }
+      }
+      if (!c2) c2 = w[1] || 'X';
+      prefix = c1 + c2;
+    }
+    const others = excludePresets || presets;
+    for (let n = 1; n < 100; n++) {
+      const candidate = prefix + String(n).padStart(2, '0');
+      if (!others.some(p => (p[2] || '').toUpperCase() === candidate)) return candidate;
+    }
+    return prefix + String(Math.floor(Math.random() * 90) + 10);
+  }
+  let barcodeSuggested = true; // flag: input still showing suggestion
+  function onPresetNameInput() {
+    if (!barcodeSuggested) return;
+    if (!document.getElementById('newPresetUseBC').checked) return;
+    const name = document.getElementById('newPresetName').value;
+    const bc = document.getElementById('newPresetBarcode');
+    bc.value = suggestBarcodeFromName(name, presets);
+    bc.classList.add('suggested');
+    updatePresetHint();
+  }
+  function onPresetBarcodeInput() {
+    barcodeSuggested = false;
+    document.getElementById('newPresetBarcode').classList.remove('suggested');
+    updatePresetHint();
+  }
+  function onToggleBarcode() {
+    const on = document.getElementById('newPresetUseBC').checked;
+    const bc = document.getElementById('newPresetBarcode');
+    bc.disabled = !on;
+    document.getElementById('pfToggle').classList.toggle('off', !on);
+    document.getElementById('pfToggleLabel').textContent = on ? L.useBarcode : L.noBarcode;
+    if (on && !bc.value) {
+      bc.value = suggestBarcodeFromName(document.getElementById('newPresetName').value, presets);
+      bc.classList.add('suggested');
+      barcodeSuggested = true;
+    }
+    updatePresetHint();
+  }
+  function updatePresetHint() {
+    const hint = document.getElementById('pfHint');
+    const on = document.getElementById('newPresetUseBC').checked;
+    if (!on) { hint.className = 'pf-hint'; hint.textContent = '💡 ' + L.bcHintOff; return; }
+    const code = document.getElementById('newPresetBarcode').value.trim().toUpperCase();
+    if (code.length > 0 && code.length < 4) { hint.className = 'pf-hint warn'; hint.textContent = '⚠️ ' + L.bcHintShort; return; }
+    const dup = presets.find(p => (p[2] || '').toUpperCase() === code && code);
+    if (dup) { hint.className = 'pf-hint warn'; hint.textContent = '⚠️ ' + L.bcHintDuplicate + ' "' + dup[0] + '"'; return; }
+    hint.className = 'pf-hint';
+    hint.textContent = '💡 ' + L.bcHintSuggest;
+  }
+
   // ===== PRESETS =====
   function renderPresets() {
-    let html = presets.map((p, i) =>
-      `<span class="preset-chip">
+    let html = presets.map((p, i) => {
+      const bc = p[2] || '';
+      const bcHtml = bc
+        ? `<span class="preset-bc">${esc(bc)}</span>`
+        : `<span class="preset-bc off">--</span>`;
+      return `<span class="preset-chip">
         <button class="preset-fill" onclick="fillPreset('${esc(p[0])}','${esc(p[1])}')">${esc(p[0])}</button>
+        ${bcHtml}
         <button class="preset-del" onclick="removePreset(${i})" title="${L.del}">×</button>
-      </span>`
-    ).join('');
+      </span>`;
+    }).join('');
     html += `<button class="preset-chip-add" onclick="toggleAddPreset(true)">${L.addPreset}</button>`;
     document.getElementById('presets').innerHTML = html;
   }
@@ -427,14 +544,39 @@
   function toggleAddPreset(show) {
     const f = document.getElementById('presetAddForm');
     f.classList.toggle('show', show);
-    if (show) { document.getElementById('newPresetName').value = ''; document.getElementById('newPresetOrigin').value = ''; document.getElementById('newPresetName').focus(); }
+    if (show) {
+      document.getElementById('newPresetName').value = '';
+      document.getElementById('newPresetOrigin').value = '';
+      document.getElementById('newPresetBarcode').value = '';
+      document.getElementById('newPresetBarcode').classList.remove('suggested');
+      document.getElementById('newPresetUseBC').checked = true;
+      document.getElementById('newPresetBarcode').disabled = false;
+      document.getElementById('pfToggle').classList.remove('off');
+      document.getElementById('pfToggleLabel').textContent = L.useBarcode;
+      barcodeSuggested = true;
+      updatePresetHint();
+      document.getElementById('newPresetName').focus();
+    }
   }
   function confirmAddPreset() {
     const name = document.getElementById('newPresetName').value.trim();
     const origin = document.getElementById('newPresetOrigin').value.trim();
+    const useBC = document.getElementById('newPresetUseBC').checked;
+    let bc = document.getElementById('newPresetBarcode').value.trim().toUpperCase();
     if (!name) { alert(L.needName); return; }
     if (presets.some(p => p[0].toLowerCase() === name.toLowerCase())) { alert(L.presetExists); return; }
-    presets.push([name, origin]); savePresets(); renderPresets(); toggleAddPreset(false);
+    if (useBC) {
+      if (!bc) bc = suggestBarcodeFromName(name, presets);
+      if (bc.length < 4) { alert(L.bcHintShort); return; }
+      if (presets.some(p => (p[2] || '').toUpperCase() === bc)) { alert(L.bcHintDuplicate + ' "' + presets.find(p => (p[2] || '').toUpperCase() === bc)[0] + '"'); return; }
+    } else {
+      bc = '';
+    }
+    presets.push([name, origin, bc]); savePresets(); renderPresets(); toggleAddPreset(false);
+  }
+  function getBarcodeForName(name) {
+    const p = presets.find(x => x[0].toLowerCase() === (name || '').toLowerCase());
+    return p ? (p[2] || '') : '';
   }
 
   function formatCzech(num) { return num.toFixed(2).replace('.', ','); }
@@ -472,7 +614,8 @@
 
     const priceKus = priceKg * weight;
     const per100g = priceKg / 10;
-    for (let i = 0; i < count; i++) labels.push({ name, origin, weight, priceKg, price: priceKus, per100g, note });
+    const barcode = getBarcodeForName(name);
+    for (let i = 0; i < count; i++) labels.push({ name, origin, weight, priceKg, price: priceKus, per100g, note, barcode });
     saveLabels();
 
     document.getElementById('fname').value = '';
@@ -498,16 +641,42 @@
     document.getElementById('previewHeading').textContent = `${L.previewTitle} (${labels.length} ${L.unit})`;
     const grouped = {};
     labels.forEach((l) => {
-      const key = `${l.name}|${l.origin}|${l.weight}|${l.priceKg}|${l.note || ''}`;
+      const key = `${l.name}|${l.origin}|${l.weight}|${l.priceKg}|${l.note || ''}|${l.barcode || ''}`;
       if (!grouped[key]) grouped[key] = { ...l, count: 0 };
       grouped[key].count++;
     });
+    let bcIdx = 0;
     let html = '';
     for (const key in grouped) {
       const g = grouped[key];
       const count = `<div class="lp-count">${g.count}×</div>`;
       const del = `<div class="lp-actions"><button class="btn-remove" onclick="removeGroup('${esc(key)}')" title="${L.del}">✕</button></div>`;
-      if (g.note) {
+      const bcId = `lp-bc-${bcIdx++}`;
+      const bcBlock = g.barcode ? `<div class="lp-barcode"><svg id="${bcId}" data-bc="${esc(g.barcode)}"></svg></div>` : '';
+      if (g.note && g.barcode) {
+        html += `
+        <div class="label-preview">${count}
+          <div class="lp-twocol">
+            <div class="lp-left">
+              <div class="lp-name">${esc(g.name)}</div>
+              <div class="lp-origin">Země původu: ${esc(g.origin)}</div>
+              <div class="lp-grid"><span>Hmotnost</span><span>${formatCzech(g.weight)} kg</span><span>Cena za kg</span><span>${formatCzech(g.priceKg)} Kč</span></div>
+              <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
+              <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
+            </div>
+            <div class="lp-right">
+              <div class="lp-right-split">
+                <div class="lp-note-block">
+                  <div class="lp-note-h">Poznámka</div>
+                  <div class="lp-note-b">${esc(g.note)}</div>
+                </div>
+                <div class="lp-bc-block">${bcBlock}</div>
+              </div>
+            </div>
+          </div>
+          ${del}
+        </div>`;
+      } else if (g.note) {
         html += `
         <div class="label-preview">${count}
           <div class="lp-twocol">
@@ -525,6 +694,21 @@
           </div>
           ${del}
         </div>`;
+      } else if (g.barcode) {
+        html += `
+        <div class="label-preview">${count}
+          <div class="lp-twocol">
+            <div class="lp-left">
+              <div class="lp-name">${esc(g.name)}</div>
+              <div class="lp-origin">Země původu: ${esc(g.origin)}</div>
+              <div class="lp-grid"><span>Hmotnost</span><span>${formatCzech(g.weight)} kg</span><span>Cena za kg</span><span>${formatCzech(g.priceKg)} Kč</span></div>
+              <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
+              <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
+            </div>
+            <div class="lp-right" style="justify-content:center;">${bcBlock}</div>
+          </div>
+          ${del}
+        </div>`;
       } else {
         html += `
         <div class="label-preview">${count}
@@ -539,12 +723,22 @@
       }
     }
     list.innerHTML = html;
+    renderBarcodes(list, { width: 1.4, height: 28, fontSize: 9 });
+  }
+  function renderBarcodes(container, opts) {
+    if (typeof JsBarcode === 'undefined') return;
+    container.querySelectorAll('svg[data-bc]').forEach(el => {
+      const code = el.getAttribute('data-bc');
+      if (!code) return;
+      try {
+        JsBarcode(el, code, Object.assign({ format: 'CODE128', displayValue: true, margin: 0, background: '#ffffff', width: 1.4, height: 28, fontSize: 9 }, opts || {}));
+      } catch (e) {}
+    });
   }
   function removeGroup(key) {
-    labels = labels.filter(l => `${l.name}|${l.origin}|${l.weight}|${l.priceKg}|${l.note || ''}` !== key);
+    labels = labels.filter(l => `${l.name}|${l.origin}|${l.weight}|${l.priceKg}|${l.note || ''}|${l.barcode || ''}` !== key);
     saveLabels(); renderPreview(); renderTracker();
   }
-
   function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
   // ===== POSITION TRACKER =====
@@ -584,28 +778,58 @@
     if (!text || text.length <= maxChars) return baseFont;
     return Math.max(minFont, +(baseFont * maxChars / text.length).toFixed(1));
   }
+  function bcSvg(code, cfg) {
+    return `<svg data-bc="${esc(code)}" style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;display:block;"></svg>`;
+  }
   function renderPrintCell(l, cfg) {
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
     if (!l) return `<div class="print-label" style="${base}"></div>`;
     const nameFont = fitFont(l.name, cfg.nameMax, cfg.nameF, Math.max(7, cfg.nameF * 0.6));
+    const hasNote = !!l.note;
+    const hasBC = !!l.barcode;
 
-    if (l.note) {
+    const infoLeft = `
+      <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
+      <div style="color:#333;font-size:${cfg.originF}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
+      <div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0.2mm;font-size:${cfg.detF}pt;line-height:1.25;">
+        <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
+        <span>Cena za kg</span><span>${formatCzech(l.priceKg)} Kč</span>
+      </div>
+      <div style="font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.6mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
+      <div style="font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>`;
+
+    if (hasNote && hasBC) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
       const headF = Math.max(6, cfg.originF - 1);
       return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
-        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">
-          <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
-          <div style="color:#333;font-size:${cfg.originF}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
-          <div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0.2mm;font-size:${cfg.detF}pt;line-height:1.25;">
-            <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
-            <span>Cena za kg</span><span>${formatCzech(l.priceKg)} Kč</span>
+        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">${infoLeft}</div>
+        <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-bottom:0.5mm;">
+            <div style="font-size:${headF}pt;color:#555;">Poznámka</div>
+            <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
           </div>
-          <div style="font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.6mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
-          <div style="font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
+          <div style="border-top:0.2mm dashed #999;padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
+            ${bcSvg(l.barcode, cfg)}
+          </div>
         </div>
+      </div>`;
+    }
+    if (hasNote) {
+      const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
+      const headF = Math.max(6, cfg.originF - 1);
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
+        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">${infoLeft}</div>
         <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:hidden;">
           <div style="font-size:${headF}pt;color:#555;margin-bottom:0.5mm;">Poznámka</div>
           <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
+        </div>
+      </div>`;
+    }
+    if (hasBC) {
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
+        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">${infoLeft}</div>
+        <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;">
+          ${bcSvg(l.barcode, cfg)}
         </div>
       </div>`;
     }
@@ -644,7 +868,22 @@
       pageCells.forEach(c => { html += renderPrintCell(c, cfg); });
       html += `</div></div>`;
     }
-    document.getElementById('printPage').innerHTML = html;
+    const pp_el = document.getElementById('printPage');
+    pp_el.innerHTML = html;
+    // Render barcodes in print SVGs — size based on layout
+    if (typeof JsBarcode !== 'undefined') {
+      pp_el.querySelectorAll('svg[data-bc]').forEach(el => {
+        const code = el.getAttribute('data-bc');
+        if (!code) return;
+        try {
+          JsBarcode(el, code, { format: 'CODE128', displayValue: true, fontSize: cfg.bcFont * 2, width: 2, height: 40, margin: 0, background: '#ffffff' });
+          // Override the JsBarcode width/height attrs so our mm CSS sizing wins via viewBox
+          el.removeAttribute('width');
+          el.removeAttribute('height');
+          el.setAttribute('preserveAspectRatio', 'none');
+        } catch (e) {}
+      });
+    }
     nextPos = ((nextPos - 1 + labels.length) % pp) + 1;
     labels = [];
     saveLabels(); savePos(); renderPreview(); renderTracker();
