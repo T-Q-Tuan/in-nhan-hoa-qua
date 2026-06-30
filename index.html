@@ -57,10 +57,10 @@
   .label-preview .lp-name { font-weight: 700; font-size: 14px; color: #2d6a2e; margin-bottom: 3px; text-align: center; }
   .label-preview .lp-origin { color: #888; font-size: 11px; margin-bottom: 5px; text-align: center; }
   .label-preview .lp-line { text-align: center; font-size: 12px; color: #444; margin-bottom: 2px; }
-  .label-preview .lp-twocol { display: flex; gap: 8px; }
-  .label-preview .lp-left { flex: 1.5; text-align: left; min-width: 0; }
+  .label-preview .lp-twocol { display: flex; gap: 12px; }
+  .label-preview .lp-left { flex: 1.3; text-align: left; min-width: 0; }
   .label-preview .lp-left .lp-name, .label-preview .lp-left .lp-origin, .label-preview .lp-left .lp-price-big, .label-preview .lp-left .lp-price100 { text-align: left; }
-  .label-preview .lp-right { flex: 1; border-left: 1px solid #ddd; padding-left: 8px; display: flex; flex-direction: column; justify-content: center; text-align: center; min-width: 0; }
+  .label-preview .lp-right { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: left; min-width: 0; }
   .label-preview .lp-grid { display: grid; grid-template-columns: max-content max-content; column-gap: 6px; row-gap: 1px; font-size: 11px; color: #444; margin-bottom: 2px; }
   .label-preview .lp-grid span:nth-child(odd) { color: #888; }
   .label-preview .lp-note-h { font-size: 10px; color: #888; margin-bottom: 2px; }
@@ -106,8 +106,8 @@
   .label-preview .lp-barcode svg { max-width: 100%; height: 28px; }
   .label-preview .lp-bc-text { font-size: 10px; color: #555; letter-spacing: 1px; font-family: 'Consolas', monospace; }
   .label-preview .lp-right-split { display: flex; flex-direction: column; height: 100%; }
-  .label-preview .lp-right-split .lp-note-block { flex: 1; padding-bottom: 4px; }
-  .label-preview .lp-right-split .lp-bc-block { border-top: 1px dashed #999; padding-top: 4px; }
+  .label-preview .lp-right-split .lp-note-block { flex: 1; }
+  .label-preview .lp-right-split .lp-bc-block { padding-top: 4px; display: flex; flex-direction: column; align-items: center; }
 
   /* main row: fields | tracker */
   .main-row { display: flex; gap: 20px; align-items: flex-start; }
@@ -804,14 +804,14 @@
     if (hasNote && hasBC) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
       const headF = Math.max(6, cfg.originF - 1);
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
-        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;overflow:hidden;">
-          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;padding-bottom:0.5mm;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;gap:3mm;">
+        <div style="flex:1.3;display:flex;flex-direction:column;justify-content:center;text-align:left;overflow:hidden;">${infoLeft}</div>
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
             <div style="font-size:${headF}pt;color:#555;">Poznámka</div>
             <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
           </div>
-          <div style="border-top:0.2mm dashed #999;padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
+          <div style="padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
             ${bcSvg(l.barcode, cfg)}
           </div>
         </div>
@@ -820,18 +820,18 @@
     if (hasNote) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
       const headF = Math.max(6, cfg.originF - 1);
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
-        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:hidden;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;gap:3mm;">
+        <div style="flex:1.3;display:flex;flex-direction:column;justify-content:center;text-align:left;overflow:hidden;">${infoLeft}</div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:left;overflow:hidden;">
           <div style="font-size:${headF}pt;color:#555;margin-bottom:0.5mm;">Poznámka</div>
           <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
         </div>
       </div>`;
     }
     if (hasBC) {
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
-        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;gap:3mm;">
+        <div style="flex:1.3;display:flex;flex-direction:column;justify-content:center;text-align:left;overflow:hidden;">${infoLeft}</div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;overflow:hidden;">
           ${bcSvg(l.barcode, cfg)}
         </div>
       </div>`;
