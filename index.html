@@ -45,16 +45,25 @@
   .btn-add { background: #2d6a2e; color: #fff; } .btn-add:hover { background: #245623; }
   .btn-print { background: #1a73e8; color: #fff; } .btn-print:hover { background: #1557b0; }
   .btn-clear { background: #e8e8e8; color: #555; } .btn-clear:hover { background: #d0d0d0; }
-  .btn-remove { background: #e74c3c; color: #fff; padding: 4px 10px; font-size: 12px; border-radius: 5px; border: none; cursor: pointer; }
+  .btn-remove { background: #f3f3f3; color: #c0392b; padding: 2px 9px; font-size: 13px; font-weight: 700; border-radius: 50%; border: 1px solid #e0e0e0; cursor: pointer; }
+  .btn-remove:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
 
   /* preview */
   .preview-section { margin: 24px 0 0; padding-top: 16px; border-top: 1px solid #eee; }
   .preview-section h2 { text-align: center; color: #555; margin-bottom: 15px; font-size: 18px; }
   .label-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
   .label-preview { border: 1.5px solid #ccc; border-radius: 8px; padding: 8px 12px; background: #fff; width: 220px; font-size: 12px; position: relative; }
-  .label-preview .lp-name { font-weight: 700; font-size: 14px; color: #2d6a2e; margin-bottom: 3px; }
-  .label-preview .lp-origin { color: #888; font-size: 11px; margin-bottom: 5px; }
-  .label-preview .lp-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+  .label-preview .lp-name { font-weight: 700; font-size: 14px; color: #2d6a2e; margin-bottom: 3px; text-align: center; }
+  .label-preview .lp-origin { color: #888; font-size: 11px; margin-bottom: 5px; text-align: center; }
+  .label-preview .lp-line { text-align: center; font-size: 12px; color: #444; margin-bottom: 2px; }
+  .label-preview .lp-twocol { display: flex; gap: 8px; }
+  .label-preview .lp-left { flex: 1.5; text-align: left; min-width: 0; }
+  .label-preview .lp-left .lp-name, .label-preview .lp-left .lp-origin, .label-preview .lp-left .lp-price-big, .label-preview .lp-left .lp-price100 { text-align: left; }
+  .label-preview .lp-right { flex: 1; border-left: 1px solid #ddd; padding-left: 8px; display: flex; flex-direction: column; justify-content: center; text-align: center; min-width: 0; }
+  .label-preview .lp-grid { display: grid; grid-template-columns: max-content max-content; column-gap: 6px; row-gap: 1px; font-size: 11px; color: #444; margin-bottom: 2px; }
+  .label-preview .lp-grid span:nth-child(odd) { color: #888; }
+  .label-preview .lp-note-h { font-size: 10px; color: #888; margin-bottom: 2px; }
+  .label-preview .lp-note-b { font-size: 11px; font-style: italic; color: #555; line-height: 1.3; word-break: break-word; }
   .label-preview .lp-price-big { font-size: 16px; font-weight: 700; color: #c0392b; text-align: center; margin-top: 4px; }
   .label-preview .lp-price100 { text-align: center; font-size: 11px; color: #777; }
   .label-preview .lp-note { text-align: center; font-size: 11px; color: #555; margin-top: 4px; font-style: italic; word-break: break-word; }
@@ -253,28 +262,6 @@
   </div>
 </div>
 
-<!-- PRINT SETTINGS MODAL -->
-<div class="modal-overlay" id="printModal">
-  <div class="modal">
-    <h2 data-i18n="modalTitle">Cài đặt in</h2>
-    <div class="modal-layout" id="modalLayout"></div>
-    <table>
-      <tr><td data-i18n="mPaper">Khổ giấy</td><td>A4</td></tr>
-      <tr><td data-i18n="mOrient">Hướng giấy</td><td data-i18n="mOrientVal">Dọc</td></tr>
-      <tr><td data-i18n="mMargin">Lề</td><td data-i18n="mMarginVal">Không (None)</td></tr>
-      <tr><td data-i18n="mScale">Tỉ lệ</td><td>100%</td></tr>
-      <tr><td data-i18n="mPages">Số trang</td><td id="modalPages"></td></tr>
-      <tr><td data-i18n="mCount">Số nhãn</td><td id="modalCount"></td></tr>
-      <tr><td data-i18n="mStart">Vị trí bắt đầu</td><td id="modalStart"></td></tr>
-    </table>
-    <div class="modal-warn" id="modalWarn" data-i18n="modalWarn"></div>
-    <div class="modal-btns">
-      <button class="modal-btn-print" onclick="confirmPrint()" data-i18n="print">In</button>
-      <button class="modal-btn-cancel" onclick="closePrintModal()" data-i18n="cancel">Hủy</button>
-    </div>
-  </div>
-</div>
-
 <div id="printPage"></div>
 
 <script>
@@ -283,13 +270,13 @@
     vi: {
       htmlLang: 'vi', docTitle: 'Nhãn trái cây',
       title: 'Nhãn trái cây', subtitle: 'In nhãn giá lên giấy decal A4',
-      fname: 'Tên trái cây', fnamePh: 'vd. Dưa hấu',
-      forigin: 'Xuất xứ (nước)', foriginPh: 'vd. Tây Ban Nha',
+      fname: 'Tên trái cây', fnamePh: 'vd. Vodní meloun',
+      forigin: 'Xuất xứ (nước)', foriginPh: 'vd. Španělsko',
       fpricekg: 'Giá mỗi kg (Kč)', fpricekgPh: 'vd. 24.90',
       fweight: 'Cân nặng (kg)', fweightPh: 'vd. 5.2',
       price100g: 'Giá mỗi 100g (Kč)', priceKus: 'Giá mỗi miếng (Kč) — tự động',
       layout: 'Khổ giấy nhãn', recommended: '(khuyên dùng)',
-      note: 'Ghi chú — hướng dẫn (tùy chọn)', notePh: 'vd. Bảo quản nơi mát, dùng trong 3 ngày',
+      note: 'Ghi chú — hướng dẫn (tùy chọn)', notePh: 'vd. Skladujte v chladu',
       count: 'Số lượng nhãn', posTitle: '📍 Vị trí in', nextLbl: 'Tiếp:',
       btnReset: 'Tờ mới', prevTitle: 'Vị trí trước', resetTitle: 'Tờ giấy mới', nextTitle: 'Vị trí sau',
       posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
@@ -318,7 +305,7 @@
       fweight: 'Hmotnost (kg)', fweightPh: 'např. 5.2',
       price100g: 'Cena za 100g (Kč)', priceKus: 'Cena za kus (Kč) — automaticky',
       layout: 'Rozložení etiket', recommended: '(doporučeno)',
-      note: 'Poznámka — návod (nepovinné)', notePh: 'např. Skladujte v chladu, spotřebujte do 3 dnů',
+      note: 'Poznámka — návod (nepovinné)', notePh: 'např. Skladujte v chladu',
       count: 'Počet etiket', posTitle: '📍 Pozice tisku', nextLbl: 'Další:',
       btnReset: 'Nový', prevTitle: 'Předchozí pozice', resetTitle: 'Nový čistý arch', nextTitle: 'Další pozice',
       posHint: 'Klikněte na pole pro start',
@@ -518,18 +505,38 @@
     let html = '';
     for (const key in grouped) {
       const g = grouped[key];
-      html += `
-        <div class="label-preview">
-          <div class="lp-count">${g.count}×</div>
+      const count = `<div class="lp-count">${g.count}×</div>`;
+      const del = `<div class="lp-actions"><button class="btn-remove" onclick="removeGroup('${esc(key)}')" title="${L.del}">✕</button></div>`;
+      if (g.note) {
+        html += `
+        <div class="label-preview">${count}
+          <div class="lp-twocol">
+            <div class="lp-left">
+              <div class="lp-name">${esc(g.name)}</div>
+              <div class="lp-origin">Země původu: ${esc(g.origin)}</div>
+              <div class="lp-grid"><span>Hmotnost</span><span>${formatCzech(g.weight)} kg</span><span>Cena za kg</span><span>${formatCzech(g.priceKg)} Kč</span></div>
+              <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
+              <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
+            </div>
+            <div class="lp-right">
+              <div class="lp-note-h">Poznámka</div>
+              <div class="lp-note-b">${esc(g.note)}</div>
+            </div>
+          </div>
+          ${del}
+        </div>`;
+      } else {
+        html += `
+        <div class="label-preview">${count}
           <div class="lp-name">${esc(g.name)}</div>
-          <div class="lp-origin">${esc(g.origin)}</div>
-          <div class="lp-row"><span>${L.fweight}</span><span>${formatCzech(g.weight)} kg</span></div>
-          <div class="lp-row"><span>${L.fpricekg}</span><span>${formatCzech(g.priceKg)} Kč</span></div>
+          <div class="lp-origin">Země původu: ${esc(g.origin)}</div>
+          <div class="lp-line">Hmotnost: ${formatCzech(g.weight)} kg</div>
+          <div class="lp-line">Cena za kg: ${formatCzech(g.priceKg)} Kč</div>
           <div class="lp-price-big">${formatCzech(g.price)} Kč/ks</div>
           <div class="lp-price100">${formatCzech(g.per100g)} Kč/100g</div>
-          ${g.note ? `<div class="lp-note">📝 ${esc(g.note)}</div>` : ''}
-          <div class="lp-actions"><button class="btn-remove" onclick="removeGroup('${esc(key)}')">${L.remove}</button></div>
+          ${del}
         </div>`;
+      }
     }
     list.innerHTML = html;
   }
@@ -581,15 +588,35 @@
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
     if (!l) return `<div class="print-label" style="${base}"></div>`;
     const nameFont = fitFont(l.name, cfg.nameMax, cfg.nameF, Math.max(7, cfg.nameF * 0.6));
-    const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
-    const noteHtml = l.note ? `<div style="text-align:center;font-size:${noteFont}pt;color:#333;margin-top:0.5mm;line-height:1.1;white-space:normal;word-break:break-word;font-style:italic;">${esc(l.note)}</div>` : '';
-    return `<div class="print-label" style="${base}padding:2mm 4mm;">
-      <div style="font-weight:700;text-align:center;font-size:${nameFont}pt;line-height:1.05;word-break:break-word;">${esc(l.name)}</div>
-      <div style="text-align:center;color:#333;font-size:${cfg.originF}pt;">Původ: ${esc(l.origin)}</div>
-      <div style="display:flex;justify-content:space-between;font-size:${cfg.detF}pt;margin-top:0.5mm;"><span>${formatCzech(l.weight)} kg</span><span>${formatCzech(l.priceKg)} Kč/kg</span></div>
-      <div style="text-align:center;font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.5mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
-      <div style="text-align:center;font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
-      ${noteHtml}
+
+    if (l.note) {
+      const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
+      const headF = Math.max(6, cfg.originF - 1);
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 3mm;">
+        <div style="flex:1.5;display:flex;flex-direction:column;justify-content:center;text-align:left;padding-right:2mm;overflow:hidden;">
+          <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
+          <div style="color:#333;font-size:${cfg.originF}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
+          <div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0.2mm;font-size:${cfg.detF}pt;line-height:1.25;">
+            <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
+            <span>Cena za kg</span><span>${formatCzech(l.priceKg)} Kč</span>
+          </div>
+          <div style="font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.6mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
+          <div style="font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
+        </div>
+        <div style="flex:1;border-left:0.3mm solid #999;padding-left:2mm;display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:hidden;">
+          <div style="font-size:${headF}pt;color:#555;margin-bottom:0.5mm;">Poznámka</div>
+          <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
+        </div>
+      </div>`;
+    }
+
+    return `<div class="print-label" style="${base}padding:2mm 4mm;text-align:center;">
+      <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
+      <div style="color:#333;font-size:${cfg.originF}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
+      <div style="font-size:${cfg.detF}pt;line-height:1.25;">Hmotnost: ${formatCzech(l.weight)} kg</div>
+      <div style="font-size:${cfg.detF}pt;line-height:1.25;">Cena za kg: ${formatCzech(l.priceKg)} Kč</div>
+      <div style="font-weight:800;font-size:${cfg.bigF}pt;margin-top:0.8mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
+      <div style="font-size:${cfg.p100F}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
     </div>`;
   }
 
@@ -601,19 +628,7 @@
       if (name && weight > 0 && priceKg > 0) addLabel();
     }
     if (labels.length === 0) { alert(L.nothingPrint); return; }
-    const cfg = LAYOUTS[curLayout()];
-    const pp = cfg.cols * cfg.rows;
-    const totalPages = Math.ceil((nextPos - 1 + labels.length) / pp);
-    document.getElementById('modalLayout').textContent = cfg.label;
-    document.getElementById('modalPages').textContent = totalPages + ' ' + L.pages;
-    document.getElementById('modalCount').textContent = labels.length + ' ' + L.unit;
-    document.getElementById('modalStart').textContent = '#' + nextPos + ' ' + L.of + ' ' + pp;
-    document.getElementById('printModal').classList.add('show');
-  }
-  function closePrintModal() { document.getElementById('printModal').classList.remove('show'); }
 
-  function confirmPrint() {
-    closePrintModal();
     const cfg = LAYOUTS[curLayout()];
     const pp = cfg.cols * cfg.rows;
     const offset = nextPos - 1;
