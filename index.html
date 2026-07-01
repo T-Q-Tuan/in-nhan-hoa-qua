@@ -812,7 +812,7 @@
     return Math.max(minFont, +(baseFont * maxChars / text.length).toFixed(1));
   }
   function bcSvg(code, cfg) {
-    return `<svg data-bc="${esc(code)}" style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;display:block;"></svg>`;
+    return `<div style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;overflow:hidden;line-height:0;display:block;"><svg data-bc="${esc(code)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>`;
   }
   function renderPrintCell(l, cfg) {
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
@@ -913,12 +913,12 @@
         if (!code) return;
         try {
           JsBarcode(el, code, { format: 'CODE128', displayValue: true, fontSize: cfg.bcFont * 2, width: 2, height: 40, margin: 0, background: '#ffffff' });
-          // Force explicit mm size on SVG (JsBarcode overwrites width/height in px)
-          el.setAttribute('width', cfg.bcW + 'mm');
-          el.setAttribute('height', cfg.bcH + 'mm');
+          // Wrapper div controls size in mm; SVG fills wrapper 100% with preserveAspectRatio="none"
+          el.removeAttribute('width');
+          el.removeAttribute('height');
           el.setAttribute('preserveAspectRatio', 'none');
-          el.style.width = cfg.bcW + 'mm';
-          el.style.height = cfg.bcH + 'mm';
+          el.style.width = '100%';
+          el.style.height = '100%';
           el.style.display = 'block';
         } catch (e) {}
       });
