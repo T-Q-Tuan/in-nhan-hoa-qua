@@ -209,6 +209,7 @@
   <div class="preset-add-form" id="presetAddForm">
     <div class="pf-row">
       <input type="text" id="newPresetName" data-i18n-ph="presetNamePh" oninput="onPresetNameInput()">
+      <input type="number" id="newPresetPriceKg" data-i18n-ph="presetPricePh" step="0.01" min="0">
       <input type="text" id="newPresetOrigin" data-i18n-ph="presetOriginPh">
       <input type="text" id="newPresetBarcode" data-i18n-ph="presetBarcodePh" maxlength="20" oninput="onPresetBarcodeInput()">
     </div>
@@ -333,7 +334,7 @@
       posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
       previewTitle: 'Xem trước nhãn', unit: 'cái',
       addLabel: 'Thêm nhãn', print: 'In', clearAll: 'Xóa hết',
-      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Mango)', presetOriginPh: 'Xuất xứ (vd. Anglie)', presetBarcodePh: 'Mã vạch',
+      addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Mango)', presetPricePh: 'Giá/kg', presetOriginPh: 'Xuất xứ (vd. Anglie)', presetBarcodePh: 'Mã vạch',
       useBarcode: 'Dùng mã vạch', noBarcode: 'Không dùng mã vạch',
       bcHintSuggest: 'Gợi ý mã từ tên — bạn có thể sửa.', bcHintOff: 'Mặt hàng này sẽ không có mã vạch khi in.',
       bcHintDuplicate: 'Mã này đã dùng cho', bcHintShort: 'Mã quá ngắn (cần tối thiểu 4 ký tự để máy quét đọc được).',
@@ -366,7 +367,7 @@
       posHint: 'Klikněte na pole pro start',
       previewTitle: 'Náhled etiket', unit: 'ks',
       addLabel: 'Přidat etiketu', print: 'Tisknout', clearAll: 'Smazat vše',
-      addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetOriginPh: 'Původ (např. Brazílie)', presetBarcodePh: 'Čárový kód',
+      addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetPricePh: 'Cena/kg', presetOriginPh: 'Původ (např. Brazílie)', presetBarcodePh: 'Čárový kód',
       useBarcode: 'Použít čárový kód', noBarcode: 'Bez čárového kódu',
       bcHintSuggest: 'Návrh kódu z názvu — můžete upravit.', bcHintOff: 'Tato položka nebude mít čárový kód při tisku.',
       bcHintDuplicate: 'Tento kód už používá', bcHintShort: 'Kód je příliš krátký (minimálně 4 znaky pro čtečku).',
@@ -397,7 +398,7 @@
     '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 6,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 15, bcH: 4, bcFont: 4 },
   };
   const DEFAULT_LAYOUT = '21';
-  const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01']];
+  const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01', '']];
 
   // localStorage (může být blokováno přes file://)
   const store = {
@@ -416,9 +417,9 @@
   function loadPresets() {
     try {
       const s = JSON.parse(store.get('etikety_presets'));
-      if (Array.isArray(s)) return s.map(p => [p[0], p[1] || '', (p[2] !== undefined) ? p[2] : suggestBarcodeFromName(p[0], [])]);
+      if (Array.isArray(s)) return s.map(p => [p[0], p[1] || '', (p[2] !== undefined) ? p[2] : suggestBarcodeFromName(p[0], []), (p[3] !== undefined) ? p[3] : '']);
     } catch (e) {}
-    return DEFAULT_PRESETS.map(p => [p[0], p[1], p[2]]);
+    return DEFAULT_PRESETS.map(p => [p[0], p[1], p[2], p[3] || '']);
   }
   function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
 
@@ -477,10 +478,16 @@
     if (text) document.getElementById('fnote').focus();
   }
 
-  function fillPreset(name, origin) {
+  function fillPreset(name, origin, priceKg) {
     document.getElementById('fname').value = name;
     document.getElementById('forigin').value = origin;
-    document.getElementById('fpricekg').focus();
+    if (priceKg) {
+      document.getElementById('fpricekg').value = priceKg;
+      autoCalc();
+      document.getElementById('fweight').focus();
+    } else {
+      document.getElementById('fpricekg').focus();
+    }
     checkNote();
   }
 
@@ -560,7 +567,7 @@
         ? `<span class="preset-bc">${esc(bc)}</span>`
         : `<span class="preset-bc off">--</span>`;
       return `<span class="preset-chip">
-        <button class="preset-fill" onclick="fillPreset('${esc(p[0])}','${esc(p[1])}')">${esc(p[0])}</button>
+        <button class="preset-fill" onclick="fillPreset('${esc(p[0])}','${esc(p[1])}','${esc(p[3] || '')}')">${esc(p[0])}</button>
         ${bcHtml}
         <button class="preset-del" onclick="removePreset(${i})" title="${L.del}">×</button>
       </span>`;
@@ -574,6 +581,7 @@
     document.getElementById('presetAddRow').style.display = show ? 'none' : 'flex';
     if (show) {
       document.getElementById('newPresetName').value = '';
+      document.getElementById('newPresetPriceKg').value = '';
       document.getElementById('newPresetOrigin').value = '';
       document.getElementById('newPresetBarcode').value = '';
       document.getElementById('newPresetBarcode').classList.remove('suggested');
@@ -588,6 +596,7 @@
   }
   function confirmAddPreset() {
     const name = document.getElementById('newPresetName').value.trim();
+    const priceKgRaw = document.getElementById('newPresetPriceKg').value.trim();
     const origin = document.getElementById('newPresetOrigin').value.trim();
     const useBC = document.getElementById('newPresetUseBC').checked;
     let bc = document.getElementById('newPresetBarcode').value.trim().toUpperCase();
@@ -600,7 +609,7 @@
     } else {
       bc = '';
     }
-    presets.push([name, origin, bc]); savePresets(); renderPresets(); toggleAddPreset(false);
+    presets.push([name, origin, bc, priceKgRaw]); savePresets(); renderPresets(); toggleAddPreset(false);
   }
   function getBarcodeForName(name) {
     const p = presets.find(x => x[0].toLowerCase() === (name || '').toLowerCase());
