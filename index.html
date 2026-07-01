@@ -144,10 +144,16 @@
   .tracker-controls button:hover { background: #2d6a2e; color: #fff; }
   .tracker-hint { text-align: center; font-size: 9px; color: #aaa; margin-top: 6px; }
   .offset-box { margin-top: 10px; padding-top: 10px; border-top: 1.5px dashed #cfe3d0; }
-  .offset-title { font-size: 11px; font-weight: 700; color: #2d6a2e; text-align: center; margin-bottom: 6px; }
+  .offset-toggle { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 8px; border: 1.5px solid #cfe3d0; background: #f7faf7; color: #2d6a2e; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .offset-toggle:hover { background: #e8f5e9; }
+  .offset-caret { font-size: 10px; transition: transform 0.2s; }
+  .offset-toggle.open .offset-caret { transform: rotate(90deg); }
+  .offset-body { display: none; margin-top: 8px; }
+  .offset-body.open { display: block; }
   .offset-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
-  .offset-row label { font-size: 11px; color: #555; font-weight: 600; }
-  .offset-row input { width: 60px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 12px; text-align: center; font-weight: 600; color: #2d6a2e; }
+  .offset-row label { font-size: 11px; color: #555; font-weight: 600; flex: 1; }
+  .offset-row input { width: 56px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 12px; text-align: center; font-weight: 600; color: #2d6a2e; }
+  .offset-unit { font-size: 10px; color: #888; width: 18px; }
   .offset-hint { font-size: 9px; color: #888; text-align: center; margin-top: 4px; line-height: 1.3; }
 
   /* modal */
@@ -306,16 +312,23 @@
       </div>
       <div class="tracker-hint" data-i18n="posHint">Bấm vào ô để chọn vị trí bắt đầu</div>
       <div class="offset-box">
-        <div class="offset-title" data-i18n="offsetTitle">🎯 Bù lệch máy in (mm)</div>
-        <div class="offset-row">
-          <label data-i18n="offsetTop">Trên</label>
-          <input type="number" id="offsetTop" step="0.5" min="0" max="15" value="5" onchange="saveOffset()">
+        <button type="button" class="offset-toggle" id="offsetToggle" onclick="toggleOffset()">
+          <span data-i18n="offsetTitle">🎯 Bù lề máy in</span>
+          <span class="offset-caret" id="offsetCaret">▸</span>
+        </button>
+        <div class="offset-body" id="offsetBody">
+          <div class="offset-row">
+            <label data-i18n="offsetTop">Trên</label>
+            <input type="number" id="offsetTop" step="0.5" min="0" max="15" value="5" onchange="saveOffset()">
+            <span class="offset-unit">mm</span>
+          </div>
+          <div class="offset-row">
+            <label data-i18n="offsetLeft">Trái</label>
+            <input type="number" id="offsetLeft" step="0.5" min="0" max="15" value="5" onchange="saveOffset()">
+            <span class="offset-unit">mm</span>
+          </div>
+          <div class="offset-hint" data-i18n="offsetHint">Nếu chữ mép trên/trái bị cắt, tăng số này lên.</div>
         </div>
-        <div class="offset-row">
-          <label data-i18n="offsetLeft">Trái</label>
-          <input type="number" id="offsetLeft" step="0.5" min="0" max="15" value="5" onchange="saveOffset()">
-        </div>
-        <div class="offset-hint" data-i18n="offsetHint">Nếu chữ mép trên/trái bị cắt, tăng số này lên.</div>
       </div>
     </div>
   </div>
@@ -461,6 +474,10 @@
   function saveOffset() {
     store.set('etikety_offset_top', document.getElementById('offsetTop').value || '0');
     store.set('etikety_offset_left', document.getElementById('offsetLeft').value || '0');
+  }
+  function toggleOffset() {
+    const open = document.getElementById('offsetBody').classList.toggle('open');
+    document.getElementById('offsetToggle').classList.toggle('open', open);
   }
 
   function buildLayoutOptions() {
