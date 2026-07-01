@@ -815,13 +815,13 @@
     if (hasNote && hasBC) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
       return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 2mm 2mm 3mm;gap:2mm;">
-        <div style="flex:0 0 60%;display:flex;flex-direction:column;overflow:hidden;">
-          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
-          <div style="padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
+        <div style="flex:0 0 60%;display:flex;flex-direction:column;">
+          <div style="text-align:left;">${infoLeft}</div>
+          <div style="margin-top:auto;padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
             ${bcSvg(l.barcode, cfg)}
           </div>
         </div>
-        <div style="flex:0 0 40%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">
+        <div style="flex:0 0 40%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
           <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
         </div>
       </div>`;
@@ -829,16 +829,16 @@
     if (hasNote) {
       const noteFont = fitFont(l.note, cfg.noteMax, cfg.noteF, 5);
       return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 2mm 2mm 3mm;gap:2mm;">
-        <div style="flex:0 0 60%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
-        <div style="flex:0 0 40%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">
+        <div style="flex:0 0 60%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
+        <div style="flex:0 0 40%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
           <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
         </div>
       </div>`;
     }
     if (hasBC) {
       return `<div class="print-label" style="${base}padding:2mm 3mm;align-items:stretch;">
-        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;overflow:hidden;">${infoLeft}</div>
-        <div style="padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;">
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
+        <div style="margin-top:auto;padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
           ${bcSvg(l.barcode, cfg)}
         </div>
       </div>`;
