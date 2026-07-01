@@ -913,10 +913,13 @@
         if (!code) return;
         try {
           JsBarcode(el, code, { format: 'CODE128', displayValue: true, fontSize: cfg.bcFont * 2, width: 2, height: 40, margin: 0, background: '#ffffff' });
-          // Override the JsBarcode width/height attrs so our mm CSS sizing wins via viewBox
-          el.removeAttribute('width');
-          el.removeAttribute('height');
+          // Force explicit mm size on SVG (JsBarcode overwrites width/height in px)
+          el.setAttribute('width', cfg.bcW + 'mm');
+          el.setAttribute('height', cfg.bcH + 'mm');
           el.setAttribute('preserveAspectRatio', 'none');
+          el.style.width = cfg.bcW + 'mm';
+          el.style.height = cfg.bcH + 'mm';
+          el.style.display = 'block';
         } catch (e) {}
       });
     }
