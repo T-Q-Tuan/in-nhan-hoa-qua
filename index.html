@@ -180,15 +180,14 @@
   /* print */
   #printPage { display: none; }
   @media print {
-    html, body { margin: 0 !important; padding: 0 !important; background: #fff; }
+    body { background: #fff; }
     .form-panel, .preview-section, .no-print { display: none !important; }
     #printPage { display: block !important; }
-    .print-page { margin: 0 !important; padding: 0 !important; }
     @page { size: A4; margin: 0; }
   }
-  .print-page { width: 210mm; height: 297mm; margin: 0; padding: 0; page-break-after: always; overflow: hidden; }
+  .print-page { width: 210mm; height: 297mm; margin: 0 auto; page-break-after: always; overflow: hidden; }
   .print-page:last-child { page-break-after: avoid; }
-  .print-grid { width: 210mm; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-content: flex-start; }
+  .print-grid { width: 210mm; display: flex; flex-wrap: wrap; align-content: flex-start; }
   .print-label { overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; }
 </style>
 </head>
