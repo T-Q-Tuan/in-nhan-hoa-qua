@@ -433,7 +433,7 @@
     '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 6,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 20, bcH: 5,  bcFont: 5 },
     '40': { label: 'A4 48,5 × 25 mm – 40ks',   cols: 4, rows: 10, w: 48.5, h: 25,   nameF: 8,  originF: 5,  detF: 6,  bigF: 11, p100F: 5,  noteF: 5,  nameMax: 12, noteMax: 90,  bcW: 18, bcH: 5,  bcFont: 4, mL: 8, mT: 22, gapX: 0, gapY: 0.39 },
   };
-  const DEFAULT_LAYOUT = '21';
+  const DEFAULT_LAYOUT = '40';
   const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01', '']];
 
   // localStorage (může být blokováno přes file://)
@@ -462,7 +462,7 @@
   // ===== INIT / LANGUAGE =====
   function init() {
     buildLayoutOptions();
-    if (!store.get('etikety_reset_v2')) { store.set('etikety_layout', DEFAULT_LAYOUT); store.set('etikety_reset_v2', '1'); }
+    if (!store.get('etikety_reset_v3')) { store.set('etikety_layout', DEFAULT_LAYOUT); store.set('etikety_reset_v3', '1'); }
     document.getElementById('flayout').value = LAYOUTS[store.get('etikety_layout')] ? store.get('etikety_layout') : DEFAULT_LAYOUT;
     document.getElementById('offsetTop').value = (store.get('etikety_offset_top') !== null) ? store.get('etikety_offset_top') : '5';
     document.getElementById('offsetLeft').value = (store.get('etikety_offset_left') !== null) ? store.get('etikety_offset_left') : '5';
@@ -485,7 +485,7 @@
     const sel = document.getElementById('flayout');
     const cur = sel.value;
     sel.innerHTML = Object.keys(LAYOUTS).map(k => {
-      const rec = k === '21' ? ' ' + L.recommended : '';
+      const rec = k === '40' ? ' ' + L.recommended : '';
       return `<option value="${k}">${LAYOUTS[k].label}${rec}</option>`;
     }).join('');
     if (cur) sel.value = cur;
