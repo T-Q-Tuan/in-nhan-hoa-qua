@@ -860,13 +860,13 @@
   function bcSvg(code, cfg) {
     return `<div style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;overflow:hidden;line-height:0;display:block;"><svg data-bc="${esc(code)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>`;
   }
-  function renderPrintCell(l, cfg, extraTop, extraLeft) {
-    extraTop = extraTop || 0; extraLeft = extraLeft || 0;
+  function renderPrintCell(l, cfg, extraTop, extraLeft, extraRight, extraBottom) {
+    extraTop = extraTop || 0; extraLeft = extraLeft || 0; extraRight = extraRight || 0; extraBottom = extraBottom || 0;
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
     if (!l) return `<div class="print-label" style="${base}"></div>`;
-    // Safe-zone padding: only edge cells (row 0 / col 0) get extra padding to
-    // dodge the printer's non-printable margin. Sticker cut positions stay identical.
-    const pad = (t, r, b, le) => `padding:${t + extraTop}mm ${r}mm ${b}mm ${le + extraLeft}mm;`;
+    // Safe-zone padding: edge cells get extra padding on the side facing the paper
+    // edge, to dodge the printer's non-printable margin. Sticker cuts stay identical.
+    const pad = (t, r, b, le) => `padding:${t + extraTop}mm ${r + extraRight}mm ${b + extraBottom}mm ${le + extraLeft}mm;`;
     // Shrink whole info cluster proportionally only if name exceeds 45 chars
     const NAME_LIMIT = 45;
     const scale = l.name.length > NAME_LIMIT ? +(NAME_LIMIT / l.name.length).toFixed(3) : 1;
@@ -970,7 +970,11 @@
       pageCells.forEach((c, j) => {
         const row = Math.floor(j / cfg.cols);
         const col = j % cfg.cols;
-        html += renderPrintCell(c, cfg, row === 0 ? effTop : 0, col === 0 ? effLeft : 0);
+        const eTop = row === 0 ? effTop : 0;
+        const eBottom = row === cfg.rows - 1 ? effTop : 0;
+        const eLeft = col === 0 ? effLeft : 0;
+        const eRight = col === cfg.cols - 1 ? effLeft : 0;
+        html += renderPrintCell(c, cfg, eTop, eLeft, eRight, eBottom);
       });
       html += `</div></div>`;
     }
