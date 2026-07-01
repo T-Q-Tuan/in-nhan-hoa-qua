@@ -309,11 +309,11 @@
         <div class="offset-title" data-i18n="offsetTitle">🎯 Bù lệch máy in (mm)</div>
         <div class="offset-row">
           <label data-i18n="offsetTop">Trên</label>
-          <input type="number" id="offsetTop" step="0.5" min="0" max="30" value="0" onchange="saveOffset()">
+          <input type="number" id="offsetTop" step="0.5" min="0" max="15" value="5" onchange="saveOffset()">
         </div>
         <div class="offset-row">
           <label data-i18n="offsetLeft">Trái</label>
-          <input type="number" id="offsetLeft" step="0.5" min="0" max="30" value="0" onchange="saveOffset()">
+          <input type="number" id="offsetLeft" step="0.5" min="0" max="15" value="5" onchange="saveOffset()">
         </div>
         <div class="offset-hint" data-i18n="offsetHint">Nếu chữ mép trên/trái bị cắt, tăng số này lên.</div>
       </div>
@@ -350,8 +350,8 @@
       count: 'Số lượng nhãn', posTitle: '📍 Vị trí in', nextLbl: 'Tiếp:',
       btnReset: 'Tờ mới', prevTitle: 'Vị trí trước', resetTitle: 'Tờ giấy mới', nextTitle: 'Vị trí sau',
       posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
-      offsetTitle: '🎯 Bù lệch máy in (mm)', offsetTop: 'Trên', offsetLeft: 'Trái',
-      offsetHint: 'Nếu chữ mép trên/trái bị cắt, tăng số này lên.',
+      offsetTitle: '🎯 Bù lề máy in (mm)', offsetTop: 'Trên', offsetLeft: 'Trái',
+      offsetHint: 'Đẩy chữ hàng đầu & cột trái vào trong để không bị máy in cắt. Còn cắt thì tăng thêm.',
       previewTitle: 'Xem trước nhãn', unit: 'cái',
       addLabel: 'Thêm nhãn', print: 'In', clearAll: 'Xóa hết',
       addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Mango)', presetPricePh: 'Giá/kg', presetOriginPh: 'Xuất xứ (vd. Anglie)', presetBarcodePh: 'Mã vạch',
@@ -385,8 +385,8 @@
       count: 'Počet etiket', posTitle: '📍 Pozice tisku', nextLbl: 'Další:',
       btnReset: 'Nový', prevTitle: 'Předchozí pozice', resetTitle: 'Nový čistý arch', nextTitle: 'Další pozice',
       posHint: 'Klikněte na pole pro start',
-      offsetTitle: '🎯 Kompenzace tisku (mm)', offsetTop: 'Nahoře', offsetLeft: 'Vlevo',
-      offsetHint: 'Pokud je text u okraje oříznut, zvyšte hodnotu.',
+      offsetTitle: '🎯 Kompenzace okraje (mm)', offsetTop: 'Nahoře', offsetLeft: 'Vlevo',
+      offsetHint: 'Posune text prvního řádku a sloupce dovnitř, aby jej tiskárna neořízla.',
       previewTitle: 'Náhled etiket', unit: 'ks',
       addLabel: 'Přidat etiketu', print: 'Tisknout', clearAll: 'Smazat vše',
       addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetPricePh: 'Cena/kg', presetOriginPh: 'Původ (např. Brazílie)', presetBarcodePh: 'Čárový kód',
@@ -450,8 +450,8 @@
     buildLayoutOptions();
     if (!store.get('etikety_reset_v2')) { store.set('etikety_layout', DEFAULT_LAYOUT); store.set('etikety_reset_v2', '1'); }
     document.getElementById('flayout').value = LAYOUTS[store.get('etikety_layout')] ? store.get('etikety_layout') : DEFAULT_LAYOUT;
-    document.getElementById('offsetTop').value = store.get('etikety_offset_top') || '0';
-    document.getElementById('offsetLeft').value = store.get('etikety_offset_left') || '0';
+    document.getElementById('offsetTop').value = (store.get('etikety_offset_top') !== null) ? store.get('etikety_offset_top') : '5';
+    document.getElementById('offsetLeft').value = (store.get('etikety_offset_left') !== null) ? store.get('etikety_offset_left') : '5';
     applyLang();
     clampPos();
     renderPresets();
@@ -842,9 +842,13 @@
   function bcSvg(code, cfg) {
     return `<div style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;overflow:hidden;line-height:0;display:block;"><svg data-bc="${esc(code)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>`;
   }
-  function renderPrintCell(l, cfg) {
+  function renderPrintCell(l, cfg, extraTop, extraLeft) {
+    extraTop = extraTop || 0; extraLeft = extraLeft || 0;
     const base = `width:${cfg.w}mm;height:${cfg.h}mm;`;
     if (!l) return `<div class="print-label" style="${base}"></div>`;
+    // Safe-zone padding: only edge cells (row 0 / col 0) get extra padding to
+    // dodge the printer's non-printable margin. Sticker cut positions stay identical.
+    const pad = (t, r, b, le) => `padding:${t + extraTop}mm ${r}mm ${b}mm ${le + extraLeft}mm;`;
     // Shrink whole info cluster proportionally only if name exceeds 45 chars
     const NAME_LIMIT = 45;
     const scale = l.name.length > NAME_LIMIT ? +(NAME_LIMIT / l.name.length).toFixed(3) : 1;
@@ -868,7 +872,7 @@
 
     if (hasNote && hasBC) {
       const noteFont = fitFont(l.note, 250, cfg.noteF, 4);
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 2mm 2mm 3mm;gap:2mm;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;${pad(2, 2, 2, 3)}gap:2mm;">
         <div style="flex:0 0 60%;display:flex;flex-direction:column;">
           <div style="text-align:left;">${infoLeft}</div>
           <div style="margin-top:auto;padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
@@ -882,7 +886,7 @@
     }
     if (hasNote) {
       const noteFont = fitFont(l.note, 250, cfg.noteF, 4);
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;padding:2mm 2mm 2mm 3mm;gap:2mm;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;${pad(2, 2, 2, 3)}gap:2mm;">
         <div style="flex:0 0 60%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
         <div style="flex:0 0 40%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
           <div style="font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>
@@ -890,7 +894,7 @@
       </div>`;
     }
     if (hasBC) {
-      return `<div class="print-label" style="${base}padding:2mm 3mm;align-items:stretch;">
+      return `<div class="print-label" style="${base}${pad(2, 3, 2, 3)}align-items:stretch;">
         <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
         <div style="margin-top:auto;padding-top:0.5mm;display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
           ${bcSvg(l.barcode, cfg)}
@@ -898,7 +902,7 @@
       </div>`;
     }
 
-    return `<div class="print-label" style="${base}padding:2mm 4mm;text-align:center;">
+    return `<div class="print-label" style="${base}${pad(2, 4, 2, 4)}text-align:center;">
       <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
       <div style="color:#333;font-size:${originFont}pt;margin-bottom:0.6mm;">Země původu: ${esc(l.origin)}</div>
       <div style="font-size:${detFont}pt;line-height:1.25;">Hmotnost: ${formatCzech(l.weight)} kg</div>
@@ -922,7 +926,7 @@
     const offset = nextPos - 1;
     const offTop = parseFloat(document.getElementById('offsetTop').value) || 0;
     const offLeft = parseFloat(document.getElementById('offsetLeft').value) || 0;
-    const padTop = Math.max(0, (297 - cfg.rows * cfg.h) / 2) + offTop;
+    const padTop = Math.max(0, (297 - cfg.rows * cfg.h) / 2);
     const cells = [];
     for (let i = 0; i < offset; i++) cells.push(null);
     labels.forEach(l => cells.push(l));
@@ -930,8 +934,14 @@
     let html = '';
     for (let p = 0; p < cells.length / pp; p++) {
       const pageCells = cells.slice(p * pp, (p + 1) * pp);
-      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;padding-left:${offLeft}mm;">`;
-      pageCells.forEach(c => { html += renderPrintCell(c, cfg); });
+      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;">`;
+      // Only the first physical row gets extra top padding; only the first physical
+      // column gets extra left padding — dodges printer dead-zone without shifting the grid.
+      pageCells.forEach((c, j) => {
+        const row = Math.floor(j / cfg.cols);
+        const col = j % cfg.cols;
+        html += renderPrintCell(c, cfg, row === 0 ? offTop : 0, col === 0 ? offLeft : 0);
+      });
       html += `</div></div>`;
     }
     const pp_el = document.getElementById('printPage');
