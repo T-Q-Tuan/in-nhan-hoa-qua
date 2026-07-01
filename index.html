@@ -431,7 +431,7 @@
     '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 11, originF: 7,  detF: 7,  bigF: 14, p100F: 7,  noteF: 8,  nameMax: 16, noteMax: 350, bcW: 35, bcH: 10, bcFont: 7 },
     '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 10, originF: 7,  detF: 7,  bigF: 13, p100F: 7,  noteF: 6,  nameMax: 15, noteMax: 170, bcW: 22, bcH: 6,  bcFont: 5 },
     '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 6,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 20, bcH: 5,  bcFont: 5 },
-    '40': { label: 'A4 52,5 × 29,7 mm – 40ks', cols: 4, rows: 10, w: 52.5, h: 29.7, nameF: 8,  originF: 5,  detF: 6,  bigF: 11, p100F: 5,  noteF: 5,  nameMax: 12, noteMax: 110, bcW: 18, bcH: 5,  bcFont: 4 },
+    '40': { label: 'A4 48,5 × 25 mm – 40ks',   cols: 4, rows: 10, w: 48.5, h: 25,   nameF: 8,  originF: 5,  detF: 6,  bigF: 11, p100F: 5,  noteF: 5,  nameMax: 12, noteMax: 90,  bcW: 18, bcH: 5,  bcFont: 4, mL: 8, mT: 22, gapX: 0, gapY: 0.39 },
   };
   const DEFAULT_LAYOUT = '21';
   const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01', '']];
@@ -944,7 +944,15 @@
     const offset = nextPos - 1;
     const offTop = parseFloat(document.getElementById('offsetTop').value) || 0;
     const offLeft = parseFloat(document.getElementById('offsetLeft').value) || 0;
-    const padTop = Math.max(0, (297 - cfg.rows * cfg.h) / 2);
+    // Layout margins/gaps (default 0 = full-bleed edge-to-edge)
+    const mL = cfg.mL || 0, mT = cfg.mT || 0, gapX = cfg.gapX || 0, gapY = cfg.gapY || 0;
+    // Vertical start: use the sheet's real top margin if defined, else center the block.
+    const padTop = mT || Math.max(0, (297 - cfg.rows * cfg.h) / 2);
+    // The printer dead-zone is already covered by the sheet margin, so only compensate
+    // the part of the offset that exceeds the existing margin.
+    const effTop = Math.max(0, offTop - mT);
+    const effLeft = Math.max(0, offLeft - mL);
+    const gapCss = (gapX || gapY) ? `column-gap:${gapX}mm;row-gap:${gapY}mm;` : '';
     const cells = [];
     for (let i = 0; i < offset; i++) cells.push(null);
     labels.forEach(l => cells.push(l));
@@ -952,13 +960,13 @@
     let html = '';
     for (let p = 0; p < cells.length / pp; p++) {
       const pageCells = cells.slice(p * pp, (p + 1) * pp);
-      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;">`;
+      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;padding-left:${mL}mm;${gapCss}">`;
       // Only the first physical row gets extra top padding; only the first physical
       // column gets extra left padding — dodges printer dead-zone without shifting the grid.
       pageCells.forEach((c, j) => {
         const row = Math.floor(j / cfg.cols);
         const col = j % cfg.cols;
-        html += renderPrintCell(c, cfg, row === 0 ? offTop : 0, col === 0 ? offLeft : 0);
+        html += renderPrintCell(c, cfg, row === 0 ? effTop : 0, col === 0 ? effLeft : 0);
       });
       html += `</div></div>`;
     }
