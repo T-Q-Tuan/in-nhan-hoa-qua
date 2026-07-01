@@ -143,6 +143,12 @@
   .tracker-controls button { flex: 1; padding: 6px 2px; border: 1.5px solid #2d6a2e; background: #fff; color: #2d6a2e; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
   .tracker-controls button:hover { background: #2d6a2e; color: #fff; }
   .tracker-hint { text-align: center; font-size: 9px; color: #aaa; margin-top: 6px; }
+  .offset-box { margin-top: 10px; padding-top: 10px; border-top: 1.5px dashed #cfe3d0; }
+  .offset-title { font-size: 11px; font-weight: 700; color: #2d6a2e; text-align: center; margin-bottom: 6px; }
+  .offset-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+  .offset-row label { font-size: 11px; color: #555; font-weight: 600; }
+  .offset-row input { width: 60px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 12px; text-align: center; font-weight: 600; color: #2d6a2e; }
+  .offset-hint { font-size: 9px; color: #888; text-align: center; margin-top: 4px; line-height: 1.3; }
 
   /* modal */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
@@ -299,6 +305,18 @@
         <button onclick="adjustPos(1)" id="btnNext">▶</button>
       </div>
       <div class="tracker-hint" data-i18n="posHint">Bấm vào ô để chọn vị trí bắt đầu</div>
+      <div class="offset-box">
+        <div class="offset-title" data-i18n="offsetTitle">🎯 Bù lệch máy in (mm)</div>
+        <div class="offset-row">
+          <label data-i18n="offsetTop">Trên</label>
+          <input type="number" id="offsetTop" step="0.5" min="0" max="30" value="0" onchange="saveOffset()">
+        </div>
+        <div class="offset-row">
+          <label data-i18n="offsetLeft">Trái</label>
+          <input type="number" id="offsetLeft" step="0.5" min="0" max="30" value="0" onchange="saveOffset()">
+        </div>
+        <div class="offset-hint" data-i18n="offsetHint">Nếu chữ mép trên/trái bị cắt, tăng số này lên.</div>
+      </div>
     </div>
   </div>
 
@@ -332,6 +350,8 @@
       count: 'Số lượng nhãn', posTitle: '📍 Vị trí in', nextLbl: 'Tiếp:',
       btnReset: 'Tờ mới', prevTitle: 'Vị trí trước', resetTitle: 'Tờ giấy mới', nextTitle: 'Vị trí sau',
       posHint: 'Bấm vào ô để chọn vị trí bắt đầu',
+      offsetTitle: '🎯 Bù lệch máy in (mm)', offsetTop: 'Trên', offsetLeft: 'Trái',
+      offsetHint: 'Nếu chữ mép trên/trái bị cắt, tăng số này lên.',
       previewTitle: 'Xem trước nhãn', unit: 'cái',
       addLabel: 'Thêm nhãn', print: 'In', clearAll: 'Xóa hết',
       addPreset: '+ Thêm', presetNamePh: 'Tên (vd. Mango)', presetPricePh: 'Giá/kg', presetOriginPh: 'Xuất xứ (vd. Anglie)', presetBarcodePh: 'Mã vạch',
@@ -365,6 +385,8 @@
       count: 'Počet etiket', posTitle: '📍 Pozice tisku', nextLbl: 'Další:',
       btnReset: 'Nový', prevTitle: 'Předchozí pozice', resetTitle: 'Nový čistý arch', nextTitle: 'Další pozice',
       posHint: 'Klikněte na pole pro start',
+      offsetTitle: '🎯 Kompenzace tisku (mm)', offsetTop: 'Nahoře', offsetLeft: 'Vlevo',
+      offsetHint: 'Pokud je text u okraje oříznut, zvyšte hodnotu.',
       previewTitle: 'Náhled etiket', unit: 'ks',
       addLabel: 'Přidat etiketu', print: 'Tisknout', clearAll: 'Smazat vše',
       addPreset: '+ Přidat', presetNamePh: 'Název (např. Mango)', presetPricePh: 'Cena/kg', presetOriginPh: 'Původ (např. Brazílie)', presetBarcodePh: 'Čárový kód',
@@ -428,11 +450,17 @@
     buildLayoutOptions();
     if (!store.get('etikety_reset_v2')) { store.set('etikety_layout', DEFAULT_LAYOUT); store.set('etikety_reset_v2', '1'); }
     document.getElementById('flayout').value = LAYOUTS[store.get('etikety_layout')] ? store.get('etikety_layout') : DEFAULT_LAYOUT;
+    document.getElementById('offsetTop').value = store.get('etikety_offset_top') || '0';
+    document.getElementById('offsetLeft').value = store.get('etikety_offset_left') || '0';
     applyLang();
     clampPos();
     renderPresets();
     renderTracker();
     renderPreview();
+  }
+  function saveOffset() {
+    store.set('etikety_offset_top', document.getElementById('offsetTop').value || '0');
+    store.set('etikety_offset_left', document.getElementById('offsetLeft').value || '0');
   }
 
   function buildLayoutOptions() {
@@ -892,7 +920,9 @@
     const cfg = LAYOUTS[curLayout()];
     const pp = cfg.cols * cfg.rows;
     const offset = nextPos - 1;
-    const padTop = Math.max(0, (297 - cfg.rows * cfg.h) / 2);
+    const offTop = parseFloat(document.getElementById('offsetTop').value) || 0;
+    const offLeft = parseFloat(document.getElementById('offsetLeft').value) || 0;
+    const padTop = Math.max(0, (297 - cfg.rows * cfg.h) / 2) + offTop;
     const cells = [];
     for (let i = 0; i < offset; i++) cells.push(null);
     labels.forEach(l => cells.push(l));
@@ -900,7 +930,7 @@
     let html = '';
     for (let p = 0; p < cells.length / pp; p++) {
       const pageCells = cells.slice(p * pp, (p + 1) * pp);
-      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;">`;
+      html += `<div class="print-page"><div class="print-grid" style="padding-top:${padTop}mm;padding-left:${offLeft}mm;">`;
       pageCells.forEach(c => { html += renderPrintCell(c, cfg); });
       html += `</div></div>`;
     }
