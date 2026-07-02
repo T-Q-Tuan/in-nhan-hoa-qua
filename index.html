@@ -293,7 +293,7 @@
           <label for="fnote" data-i18n="note">Ghi chú — hướng dẫn (tùy chọn)</label>
           <div class="note-tools">
             <button type="button" class="note-btn" onclick="insertExpiryNote()">🍉 <span data-i18n="expiryBtn">Tự điền HSD</span></button>
-            <div class="note-date-wrap" title="Chọn ngày khác">
+            <div class="note-date-wrap" title="Chọn ngày khác" onclick="openDatePicker()">
               <span class="note-date-cap">📅 <span data-i18n="expiryDateLabel">Ngày khác</span></span>
               <input type="date" id="expiryDate" class="note-date" onchange="insertExpiryNote()">
             </div>
@@ -476,7 +476,7 @@
   }
   function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
 
-  const APP_VERSION = 'v1.4';
+  const APP_VERSION = 'v1.5';
 
   // ===== INIT / LANGUAGE =====
   function init() {
@@ -546,6 +546,10 @@
   }
   // Czech date format "5. 7. 2026"
   function czDate(d) { return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()}`; }
+  function openDatePicker() {
+    const el = document.getElementById('expiryDate');
+    try { el.showPicker(); } catch (e) { el.focus(); }
+  }
   function insertExpiryNote() {
     const el = document.getElementById('expiryDate');
     let d;
