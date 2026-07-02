@@ -431,7 +431,7 @@
     '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 11, originF: 7,  detF: 7,  bigF: 14, p100F: 7,  noteF: 8,  nameMax: 16, noteMax: 350, bcW: 35, bcH: 10, bcFont: 7 },
     '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 10, originF: 7,  detF: 7,  bigF: 13, p100F: 7,  noteF: 6,  nameMax: 15, noteMax: 170, bcW: 22, bcH: 6,  bcFont: 5 },
     '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 6,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 20, bcH: 5,  bcFont: 5 },
-    '40': { label: 'A4 48,5 × 25 mm – 40ks',   cols: 4, rows: 10, w: 48.5, h: 25,   nameF: 10, originF: 5,  detF: 5,  bigF: 15, p100F: 6,  noteF: 5,  nameMax: 12, noteMax: 90,  bcW: 15, bcH: 5,  bcFont: 4, mergeDetail: true, bcRight: true, mL: 8, mT: 22, gapX: 0, gapY: 0.39 },
+    '40': { label: 'A4 48,5 × 25 mm – 40ks',   cols: 4, rows: 10, w: 48.5, h: 25,   nameF: 10, originF: 5,  detF: 5,  bigF: 15, p100F: 6,  noteF: 5,  nameMax: 12, noteMax: 90,  bcW: 18, bcH: 6,  bcFont: 4, mergeDetail: true, bcRight: true, mL: 8, mT: 22, gapX: 0, gapY: 0.39 },
   };
   const DEFAULT_LAYOUT = '40';
   const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01', '']];
@@ -914,11 +914,11 @@
           <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
           <span>Cena za kg</span><span>${formatCzech(l.priceKg)} Kč</span>
         </div>
-        <div style="display:flex;align-items:center;gap:2mm;">
-          <div style="font-weight:800;font-size:${priceFont}pt;line-height:1.05;white-space:nowrap;">${formatCzech(l.price)} Kč/ks</div>
+        <div style="font-weight:800;font-size:${priceFont}pt;line-height:1.05;white-space:nowrap;">${formatCzech(l.price)} Kč/ks</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:2mm;">
+          <div style="font-size:${p100Font}pt;color:#333;white-space:nowrap;">${formatCzech(l.per100g)} Kč / 100g</div>
           <div style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;flex-shrink:0;"><svg data-bc="${esc(l.barcode)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>
         </div>
-        <div style="font-size:${p100Font}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
       </div>`;
     }
     if (hasNote && hasBC) {
