@@ -471,6 +471,7 @@
     renderPresets();
     renderTracker();
     renderPreview();
+    updateOffsetVisibility();
   }
   function saveOffset() {
     store.set('etikety_offset_top', document.getElementById('offsetTop').value || '0');
@@ -823,7 +824,14 @@
   // ===== POSITION TRACKER =====
   function clampPos() { const pp = perPage(); if (nextPos < 1) nextPos = 1; if (nextPos > pp) nextPos = pp; savePos(); }
   function savePos() { store.set('etikety_nextpos', nextPos); store.set('etikety_layout', curLayout()); }
-  function onLayoutChange() { clampPos(); renderTracker(); checkNote(); }
+  function onLayoutChange() { clampPos(); renderTracker(); checkNote(); updateOffsetVisibility(); }
+  // Hide "Bù lề máy in" for sheets whose own margins already clear the printer dead-zone.
+  function updateOffsetVisibility() {
+    const cfg = LAYOUTS[curLayout()];
+    const covered = (cfg.mT || 0) >= 5 && (cfg.mL || 0) >= 5;
+    const box = document.querySelector('.offset-box');
+    if (box) box.style.display = covered ? 'none' : '';
+  }
   function setStartPos(n) { nextPos = n; clampPos(); renderTracker(); }
   function adjustPos(d) { const pp = perPage(); nextPos += d; if (nextPos < 1) nextPos = pp; if (nextPos > pp) nextPos = 1; savePos(); renderTracker(); }
   function resetPos() { nextPos = 1; savePos(); renderTracker(); }
@@ -892,9 +900,8 @@
       <div style="font-weight:800;font-size:${bigFont}pt;margin-top:0.6mm;line-height:1;">${formatCzech(l.price)} Kč/ks</div>
       <div style="font-size:${p100Font}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>`;
 
-    // Small layouts (bcRight): info gets the FULL height of the left column so every
-    // line shows completely; the barcode sits in the right column (doesn't steal
-    // vertical space from info). Note, if present, stacks above the barcode.
+    // Small layouts (bcRight, e.g. 40ks): info flows top-to-bottom full width; the
+    // barcode shares the last info row (per-100g line); note is pinned top-right.
     if (hasBC && cfg.bcRight) {
       const noteFont = hasNote ? fitFont(l.note, 250, cfg.noteF, 4) : 0;
       // Note pinned to the top-right corner (independent of the info flow below).
