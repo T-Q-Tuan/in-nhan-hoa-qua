@@ -431,7 +431,7 @@
     '21': { label: 'A4 70 × 42,3 mm – 21ks',   cols: 3, rows: 7, w: 70,  h: 42.3,  nameF: 11, originF: 7,  detF: 7,  bigF: 14, p100F: 7,  noteF: 8,  nameMax: 16, noteMax: 350, bcW: 35, bcH: 10, bcFont: 7 },
     '24': { label: 'A4 70 × 36 mm – 24ks',     cols: 3, rows: 8, w: 70,  h: 36,    nameF: 10, originF: 7,  detF: 7,  bigF: 13, p100F: 7,  noteF: 6,  nameMax: 15, noteMax: 170, bcW: 22, bcH: 6,  bcFont: 5 },
     '27': { label: 'A4 70 × 31,5 mm – 27ks',   cols: 3, rows: 9, w: 70,  h: 31.5,  nameF: 9,  originF: 6,  detF: 6,  bigF: 12, p100F: 6,  noteF: 5,  nameMax: 14, noteMax: 140, bcW: 20, bcH: 5,  bcFont: 5 },
-    '40': { label: 'A4 48,5 × 25 mm – 40ks',   cols: 4, rows: 10, w: 48.5, h: 25,   nameF: 10, originF: 6,  detF: 7,  bigF: 15, p100F: 6,  noteF: 5,  nameMax: 12, noteMax: 90,  bcW: 18, bcH: 4,  bcFont: 4, mergeDetail: true, bcRight: true, mL: 8, mT: 22, gapX: 0, gapY: 0.39 },
+    '40': { label: 'A4 48,5 × 25 mm – 40ks',   cols: 4, rows: 10, w: 48.5, h: 25,   nameF: 10, originF: 6,  detF: 7,  bigF: 15, p100F: 6,  noteF: 5,  nameMax: 12, noteMax: 90,  bcW: 15, bcH: 5,  bcFont: 4, mergeDetail: true, bcRight: true, mL: 8, mT: 22, gapX: 0, gapY: 0.39 },
   };
   const DEFAULT_LAYOUT = '40';
   const DEFAULT_PRESETS = [['Vodní meloun', 'Španělsko', 'VM01', '']];
@@ -897,16 +897,16 @@
     // vertical space from info). Note, if present, stacks above the barcode.
     if (hasBC && cfg.bcRight) {
       const noteFont = hasNote ? fitFont(l.note, 250, cfg.noteF, 4) : 0;
-      const rightTop = hasNote
-        ? `<div style="flex:1;font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>`
+      const noteCol = hasNote
+        ? `<div style="flex:0 0 30%;font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>`
         : '';
-      const bcAlign = hasNote ? 'margin-top:auto;' : 'margin:auto 0;';
+      // Barcode sits at the BOTTOM-LEFT of the info column, left-aligned, ≤30% width.
       return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;${pad(0, 2, 1.5, 3)}gap:1mm;">
-        <div style="flex:0 0 70%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
-        <div style="flex:0 0 30%;display:flex;flex-direction:column;">
-          ${rightTop}
-          <div style="${bcAlign}display:flex;justify-content:center;flex-shrink:0;">${bcSvg(l.barcode, cfg)}</div>
+        <div style="flex:0 0 70%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
+          ${infoLeft}
+          <div style="margin-top:auto;display:flex;justify-content:flex-start;flex-shrink:0;padding-top:0.3mm;">${bcSvg(l.barcode, cfg)}</div>
         </div>
+        ${noteCol || '<div style="flex:0 0 30%;"></div>'}
       </div>`;
     }
     if (hasNote && hasBC) {
