@@ -915,7 +915,7 @@
       const originFit = fitFont(originText, 20, originFont, 4);
       return `<div class="print-label" style="${base}flex-direction:column;justify-content:flex-start;position:relative;${pad(0, 3, 1.5, 3)}text-align:left;">
         ${noteAbs}
-        <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;width:62%;">${esc(l.name)}</div>
+        <div style="font-weight:700;font-size:${nameFont}pt;line-height:0.85;word-break:break-word;width:62%;">${esc(l.name)}</div>
         <div style="color:#333;font-size:${originFit}pt;width:62%;white-space:nowrap;overflow:hidden;">Země původu: ${esc(l.origin)}</div>
         <div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0;font-size:${detFont}pt;line-height:1.2;color:#333;width:62%;">
           <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
