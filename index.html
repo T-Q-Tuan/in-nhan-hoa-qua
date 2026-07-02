@@ -897,16 +897,16 @@
     // vertical space from info). Note, if present, stacks above the barcode.
     if (hasBC && cfg.bcRight) {
       const noteFont = hasNote ? fitFont(l.note, 250, cfg.noteF, 4) : 0;
-      const noteCol = hasNote
-        ? `<div style="flex:0 0 30%;font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>`
-        : '';
-      // Barcode sits at the BOTTOM-LEFT of the info column, left-aligned, ≤30% width.
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;${pad(0, 2, 1.5, 3)}gap:1mm;">
-        <div style="flex:0 0 70%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">
-          ${infoLeft}
-          <div style="margin-top:auto;display:flex;justify-content:flex-start;flex-shrink:0;padding-top:0.3mm;">${bcSvg(l.barcode, cfg)}</div>
+      const noteCell = hasNote
+        ? `<div style="flex:1;font-size:${noteFont}pt;font-style:italic;line-height:1.15;overflow:hidden;">${esc(l.note)}</div>`
+        : `<div style="flex:1;"></div>`;
+      // Info spans full width on top; bottom row = barcode 30% (left) + note 70% (right).
+      return `<div class="print-label" style="${base}flex-direction:column;${pad(0, 2, 1.5, 3)}">
+        <div style="flex:1;text-align:left;overflow:hidden;min-height:0;">${infoLeft}</div>
+        <div style="flex-shrink:0;display:flex;flex-direction:row;align-items:flex-end;gap:2mm;padding-top:0.3mm;">
+          <div style="flex:0 0 30%;height:${cfg.bcH}mm;"><svg data-bc="${esc(l.barcode)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>
+          ${noteCell}
         </div>
-        ${noteCol || '<div style="flex:0 0 30%;"></div>'}
       </div>`;
     }
     if (hasNote && hasBC) {
