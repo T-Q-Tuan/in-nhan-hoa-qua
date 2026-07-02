@@ -47,6 +47,7 @@
   .note-date { -webkit-appearance: none; appearance: none; min-height: 36px; min-width: 155px; padding: 6px 10px; border: 1.5px solid #cfe3d0; border-radius: 8px; font-size: 16px; color: #333; background: #fff; font-family: inherit; }
   .note-date:focus { outline: none; border-color: #2d6a2e; }
   .note-date-hint { font-size: 11px; color: #6b8e6d; margin-top: 8px; line-height: 1.35; }
+  .app-footer { text-align: center; margin-top: 18px; font-size: 11px; color: #c4c4c4; letter-spacing: 0.3px; }
   .note-warn {
     display: none; margin-top: 5px; font-size: 12px; color: #b8860b;
     background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 5px 8px;
@@ -355,6 +356,8 @@
     <button class="btn btn-print" onclick="printLabels()" data-i18n="print">In</button>
     <button class="btn btn-clear" onclick="clearAll()" data-i18n="clearAll">Xóa hết</button>
   </div>
+
+  <div class="app-footer"><span id="appVersion"></span> · Quoc Tuan Tran</div>
 </div>
 
 <div id="printPage"></div>
@@ -475,8 +478,11 @@
   }
   function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
 
+  const APP_VERSION = 'v1.2';
+
   // ===== INIT / LANGUAGE =====
   function init() {
+    document.getElementById('appVersion').textContent = APP_VERSION;
     buildLayoutOptions();
     if (!store.get('etikety_reset_v3')) { store.set('etikety_layout', DEFAULT_LAYOUT); store.set('etikety_reset_v3', '1'); }
     document.getElementById('flayout').value = LAYOUTS[store.get('etikety_layout')] ? store.get('etikety_layout') : DEFAULT_LAYOUT;
