@@ -897,16 +897,20 @@
     // vertical space from info). Note, if present, stacks above the barcode.
     if (hasBC && cfg.bcRight) {
       const noteFont = hasNote ? fitFont(l.note, 250, cfg.noteF, 4) : 0;
-      const noteCell = hasNote
-        ? `<div style="flex:1;font-size:${noteFont}pt;font-style:italic;line-height:1.15;overflow:hidden;">${esc(l.note)}</div>`
-        : `<div style="flex:1;"></div>`;
-      // Info spans full width on top; bottom row = barcode 30% (left) + note 70% (right).
-      return `<div class="print-label" style="${base}flex-direction:column;${pad(0, 2, 1.5, 3)}">
-        <div style="flex:1;text-align:left;overflow:hidden;min-height:0;">${infoLeft}</div>
-        <div style="flex-shrink:0;display:flex;flex-direction:row;align-items:flex-end;gap:2mm;padding-top:0.3mm;">
-          <div style="flex:0 0 30%;height:${cfg.bcH}mm;"><svg data-bc="${esc(l.barcode)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>
-          ${noteCell}
+      const noteLine = hasNote
+        ? `<div style="font-size:${noteFont}pt;font-style:italic;color:#333;line-height:1.15;word-break:break-word;">${esc(l.note)}</div>`
+        : '';
+      // Barcode sits on the SAME ROW as the big price, right-aligned, free of any column split.
+      return `<div class="print-label" style="${base}flex-direction:column;justify-content:flex-start;${pad(0, 3, 1.5, 3)}text-align:left;">
+        <div style="font-weight:700;font-size:${nameFont}pt;line-height:1.1;word-break:break-word;">${esc(l.name)}</div>
+        <div style="color:#333;font-size:${originFont}pt;">Země původu: ${esc(l.origin)}</div>
+        <div style="font-size:${detFont}pt;color:#333;line-height:1.2;">${formatCzech(l.weight)} kg · ${formatCzech(l.priceKg)} Kč/kg</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:2mm;">
+          <div style="font-weight:800;font-size:${bigFont}pt;line-height:1.05;">${formatCzech(l.price)} Kč/ks</div>
+          <div style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;flex-shrink:0;"><svg data-bc="${esc(l.barcode)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>
         </div>
+        <div style="font-size:${p100Font}pt;color:#333;">${formatCzech(l.per100g)} Kč / 100g</div>
+        ${noteLine}
       </div>`;
     }
     if (hasNote && hasBC) {
