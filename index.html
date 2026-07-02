@@ -901,9 +901,9 @@
         ? `<div style="flex:1;font-size:${noteFont}pt;font-style:italic;line-height:1.2;word-break:break-word;">${esc(l.note)}</div>`
         : '';
       const bcAlign = hasNote ? 'margin-top:auto;' : 'margin:auto 0;';
-      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;${pad(1.5, 2, 1.5, 3)}gap:1.5mm;">
-        <div style="flex:0 0 62%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
-        <div style="flex:0 0 38%;display:flex;flex-direction:column;">
+      return `<div class="print-label" style="${base}flex-direction:row;align-items:stretch;${pad(0, 2, 1.5, 3)}gap:1mm;">
+        <div style="flex:0 0 70%;display:flex;flex-direction:column;justify-content:flex-start;text-align:left;">${infoLeft}</div>
+        <div style="flex:0 0 30%;display:flex;flex-direction:column;">
           ${rightTop}
           <div style="${bcAlign}display:flex;justify-content:center;flex-shrink:0;">${bcSvg(l.barcode, cfg)}</div>
         </div>
