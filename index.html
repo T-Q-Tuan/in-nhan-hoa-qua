@@ -39,11 +39,9 @@
   .note-tools { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
   .note-btn { display: inline-flex; align-items: center; gap: 5px; height: 38px; padding: 0 12px; border: 1.5px solid #ddd; background: #fff; color: #444; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: inherit; }
   .note-btn:hover { border-color: #2d6a2e; color: #2d6a2e; }
-  .note-date-wrap { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 38px; padding: 0 12px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; overflow: hidden; }
-  .note-date-wrap:hover, .note-date-wrap:focus-within { border-color: #2d6a2e; }
-  .note-date-cap { font-size: 13px; font-weight: 600; color: #444; white-space: nowrap; pointer-events: none; }
-  .note-date-wrap:hover .note-date-cap { color: #2d6a2e; }
-  .note-date-wrap .note-date { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; border: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
+  .note-date-lead { font-size: 12px; font-weight: 600; color: #666; white-space: nowrap; }
+  .note-date { min-height: 38px; padding: 6px 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; color: #333; background: #fff; font-family: inherit; cursor: pointer; }
+  .note-date:focus { outline: none; border-color: #2d6a2e; }
   .note-btn-clear { width: 38px; height: 38px; border: 1.5px solid #eee; background: #fff; color: #aaa; font-size: 15px; border-radius: 8px; cursor: pointer; }
   .note-btn-clear:hover { border-color: #e74c3c; color: #e74c3c; }
   .note-date-hint { font-size: 11px; color: #aaa; margin: 0 0 6px; line-height: 1.35; }
@@ -293,10 +291,9 @@
           <label for="fnote" data-i18n="note">Ghi chú — hướng dẫn (tùy chọn)</label>
           <div class="note-tools">
             <button type="button" class="note-btn" onclick="insertExpiryNote()">🍉 <span data-i18n="expiryBtn">Tự điền HSD</span></button>
-            <div class="note-date-wrap" title="Chọn ngày khác">
-              <span class="note-date-cap">📅 <span data-i18n="expiryDateLabel">Ngày khác</span></span>
-              <input type="date" id="expiryDate" class="note-date" onchange="insertExpiryNote()">
-            </div>
+            <span class="note-date-lead" data-i18n="expiryDateLabel">📅 Ngày khác</span>
+            <input type="date" id="expiryDate" class="note-date" onchange="insertExpiryNote()" title="Chọn ngày khác">
+
             <button type="button" class="note-btn-clear" onclick="setNote('')" title="Xóa">✕</button>
           </div>
           <div class="note-date-hint" data-i18n="expiryHint">Bấm 🍉 = điền “bảo quản lạnh + hạn 3 ngày”. Muốn ngày khác thì chọn ở ô lịch.</div>
@@ -397,7 +394,7 @@
       confirmClear: 'Xóa tất cả nhãn?', presetExists: 'Trái cây này đã có trong danh sách.',
       warnPrefix: '⚠️ Chữ dài:', warnSuffix: '— cỡ chữ trên nhãn sẽ tự thu nhỏ để vừa.',
       noteExceedPrefix: '🛑 Ghi chú vượt quá giới hạn:', noteExceedSuffix: 'ký tự — hãy xóa bớt để có thể in.',
-      expiryDateLabel: 'Ngày khác', expiryBtn: 'Tự điền HSD',
+      expiryDateLabel: '📅 Ngày khác', expiryBtn: 'Tự điền HSD',
       expiryHint: 'Bấm 🍉 = điền “bảo quản lạnh + hạn 3 ngày”. Muốn ngày khác thì chọn ở ô lịch.',
     },
     cs: {
@@ -434,7 +431,7 @@
       confirmClear: 'Opravdu smazat všechny etikety?', presetExists: 'Toto ovoce už v seznamu je.',
       warnPrefix: '⚠️ Dlouhý text:', warnSuffix: '— písmo bude na etiketě zmenšeno, aby se vešlo.',
       noteExceedPrefix: '🛑 Poznámka přesahuje limit:', noteExceedSuffix: 'znaků — zkraťte text pro tisk.',
-      expiryDateLabel: 'Jiné datum', expiryBtn: 'Doplnit datum',
+      expiryDateLabel: '📅 Jiné datum', expiryBtn: 'Doplnit datum',
       expiryHint: 'Tlačítko 🍉 = doplní „skladujte v chladu + 3 dny". Jiné datum vyberte v poli data.',
     }
   };
@@ -476,7 +473,7 @@
   }
   function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
 
-  const APP_VERSION = 'v1.6';
+  const APP_VERSION = 'v1.7';
 
   // ===== INIT / LANGUAGE =====
   function init() {
@@ -555,7 +552,10 @@
       d = new Date();
       d.setDate(d.getDate() + 3); // default: today + 3 days
     }
-    setNote(`Skladujte v chladu, spotřebujte do ${czDate(d)}.`);
+    // Set note WITHOUT focusing the textarea — focusing would steal focus from the
+    // open date picker on iOS and close it immediately.
+    document.getElementById('fnote').value = `Skladujte v chladu, spotřebujte do ${czDate(d)}.`;
+    checkNote();
   }
 
   function fillPreset(name, origin, priceKg) {
