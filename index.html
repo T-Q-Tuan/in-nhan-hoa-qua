@@ -48,10 +48,13 @@
   .mode-switch { display: flex; border: 1.5px solid #cfe3d0; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
   .mode-switch button { flex: 1; padding: 10px 6px; border: none; background: #fff; color: #666; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .mode-switch button.active { background: #2d6a2e; color: #fff; }
-  .price-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-  .price-label-row label { margin-bottom: 0; }
+  .price-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+  .price-label-row label { margin-bottom: 0; white-space: nowrap; }
+  .price-label-row + input { margin-top: auto; }
+  #grpWeight label { margin-bottom: 0; padding: 4px 0; }
+  #grpWeight input { margin-top: auto; }
   .unit-switch { display: inline-flex; border: 1.5px solid #ddd; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
-  .unit-switch button { border: none; background: #fff; color: #888; font-size: 11px; font-weight: 600; padding: 4px 10px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .unit-switch button { border: none; background: #fff; color: #888; font-size: 10px; font-weight: 600; padding: 3px 7px; cursor: pointer; font-family: inherit; white-space: nowrap; }
   .unit-switch button.active { background: #2d6a2e; color: #fff; }
   .jakost-btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .jakost-btns button { padding: 8px 16px; border: 1.5px solid #ddd; background: #fff; color: #555; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: inherit; }
