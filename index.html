@@ -59,7 +59,9 @@
   .jakost-btns button.active { border-color: #2d6a2e; background: #2d6a2e; color: #fff; }
   .jakost-hint { font-size: 11px; color: #b8860b; margin-top: 4px; }
   .preset-chip .preset-tag { font-size: 10px; padding: 0 6px; border-left: 1px solid #ddd; color: #888; }
-  .app-footer { text-align: center; margin-top: 18px; font-size: 11px; color: #c4c4c4; letter-spacing: 0.3px; }
+  .app-footer { text-align: center; margin-top: 18px; font-size: 11px; color: #c4c4c4; letter-spacing: 0.3px; line-height: 1.9; }
+  .app-footer .footer-guide { color: #7aa87c; text-decoration: none; font-size: 12px; font-weight: 600; }
+  .app-footer .footer-guide:hover { color: #2d6a2e; text-decoration: underline; }
   .note-warn {
     display: none; margin-top: 5px; font-size: 12px; color: #b8860b;
     background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 5px 8px;
@@ -409,7 +411,7 @@
     <button class="btn btn-clear" onclick="clearAll()" data-i18n="clearAll">Xóa hết</button>
   </div>
 
-  <div class="app-footer"><span id="appVersion"></span> · Quoc Tuan Tran</div>
+  <div class="app-footer"><a href="huong-dan.html" class="footer-guide" data-i18n="guideLink">📖 Hướng dẫn sử dụng</a><br><span id="appVersion"></span> · Quoc Tuan Tran</div>
 </div>
 
 <div id="printPage"></div>
@@ -461,6 +463,7 @@
       navodPh: 'vd. Skladujte v chladu.\nPřed konzumací omyjte.',
       navodSave: 'Lưu mẫu', navodHint: 'Font tự co giãn: chữ ít → to, chữ nhiều → nhỏ lại. Xuống dòng được giữ nguyên.',
       needNavod: 'Hãy nhập nội dung hướng dẫn.', navodPresetName: 'Đặt tên cho mẫu này:',
+      guideLink: '📖 Hướng dẫn sử dụng',
     },
     cs: {
       htmlLang: 'cs', docTitle: 'Cenovky',
@@ -506,6 +509,7 @@
       navodPh: 'např. Skladujte v chladu.\nPřed konzumací omyjte.',
       navodSave: 'Uložit šablonu', navodHint: 'Písmo se přizpůsobí: málo textu → velké, hodně textu → menší. Řádkování zůstane.',
       needNavod: 'Vyplňte text návodu.', navodPresetName: 'Název šablony:',
+      guideLink: '📖 Návod k použití',
     }
   };
 
