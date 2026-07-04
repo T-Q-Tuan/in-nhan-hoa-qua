@@ -48,11 +48,9 @@
   .mode-switch { display: flex; border: 1.5px solid #cfe3d0; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
   .mode-switch button { flex: 1; padding: 10px 6px; border: none; background: #fff; color: #666; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .mode-switch button.active { background: #2d6a2e; color: #fff; }
-  .price-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+  .price-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; min-height: 22px; }
   .price-label-row label { margin-bottom: 0; white-space: nowrap; }
   .price-label-row + input { margin-top: auto; }
-  #grpWeight label { margin-bottom: 0; padding: 4px 0; }
-  #grpWeight input { margin-top: auto; }
   .unit-switch { display: inline-flex; border: 1.5px solid #ddd; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
   .unit-switch button { border: none; background: #fff; color: #888; font-size: 10px; font-weight: 600; padding: 3px 7px; cursor: pointer; font-family: inherit; white-space: nowrap; }
   .unit-switch button.active { background: #2d6a2e; color: #fff; }
@@ -237,7 +235,7 @@
 
   <div class="mode-switch">
     <button type="button" id="modePrice" onclick="setMode('price')">🏷️ <span data-i18n="modePrice">Nhãn giá</span></button>
-    <button type="button" id="modeNavod" onclick="setMode('navod')">📋 <span data-i18n="modeNavod">Návod</span></button>
+    <button type="button" id="modeNavod" onclick="setMode('navod')">📋 <span data-i18n="modeNavod">Hướng dẫn</span></button>
   </div>
 
   <div class="presets" id="presets"></div>
@@ -291,7 +289,9 @@
           <input type="number" id="fpricekg" step="0.01" min="0" data-i18n-ph="fpricekgPh" oninput="autoCalc()">
         </div>
         <div class="form-group" id="grpWeight">
-          <label for="fweight" data-i18n="fweight">Cân nặng (kg)</label>
+          <div class="price-label-row">
+            <label for="fweight" data-i18n="fweight">Cân nặng (kg)</label>
+          </div>
           <input type="number" id="fweight" step="0.01" min="0" data-i18n-ph="fweightPh" oninput="autoCalc()">
         </div>
       </div>
@@ -324,7 +324,7 @@
       <div id="navodSection" style="display:none;">
         <div class="form-row">
           <div class="form-group">
-            <label for="fnavod" data-i18n="navodLabel">Nội dung návod — chữ sẽ chiếm toàn bộ nhãn</label>
+            <label for="fnavod" data-i18n="navodLabel">Nội dung hướng dẫn — chữ sẽ chiếm toàn bộ nhãn</label>
             <textarea id="fnavod" rows="6" data-i18n-ph="navodPh"></textarea>
             <div class="note-tools">
               <button type="button" class="note-btn" onclick="saveNavodPreset()">💾 <span data-i18n="navodSave">Lưu mẫu</span></button>
@@ -453,14 +453,14 @@
       noteExceedPrefix: '🛑 Ghi chú vượt quá giới hạn:', noteExceedSuffix: 'ký tự — hãy xóa bớt để có thể in.',
       expiryDateLabel: '📅 Ngày khác', expiryBtn: 'Tự điền HSD',
       expiryHint: 'Bấm 🍉 = tự điền hạn 3 ngày. Bấm 📅 = mở lịch chọn ngày khác.',
-      modePrice: 'Nhãn giá', modeNavod: 'Návod',
+      modePrice: 'Nhãn giá', modeNavod: 'Hướng dẫn',
       priceLabelKg: 'Giá mỗi kg (Kč)', priceLabelKs: 'Giá mỗi cái (Kč/ks)',
       jakostLabel: 'Jakost — hạng chất lượng (bắt buộc với mặt hàng này)',
       jakostHint: 'Mặt hàng này thuộc nhóm bắt buộc ghi hạng chất lượng (SZPI).',
-      navodLabel: 'Nội dung návod — chữ sẽ chiếm toàn bộ nhãn',
+      navodLabel: 'Nội dung hướng dẫn — chữ sẽ chiếm toàn bộ nhãn',
       navodPh: 'vd. Skladujte v chladu.\nPřed konzumací omyjte.',
       navodSave: 'Lưu mẫu', navodHint: 'Font tự co giãn: chữ ít → to, chữ nhiều → nhỏ lại. Xuống dòng được giữ nguyên.',
-      needNavod: 'Hãy nhập nội dung návod.', navodPresetName: 'Đặt tên cho mẫu này:',
+      needNavod: 'Hãy nhập nội dung hướng dẫn.', navodPresetName: 'Đặt tên cho mẫu này:',
     },
     cs: {
       htmlLang: 'cs', docTitle: 'Cenovky',
