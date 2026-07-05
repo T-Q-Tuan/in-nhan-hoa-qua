@@ -26,7 +26,7 @@
   .lang-switch button.active { border-color: #2d6a2e; background: #2d6a2e; color: #fff; }
 
   .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-  .form-group { flex: 1; display: flex; flex-direction: column; }
+  .form-group { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .form-group label { font-weight: 600; margin-bottom: 4px; font-size: 13px; color: #555; }
   .form-group input, .form-group select, .form-group textarea {
     padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px;
@@ -49,15 +49,22 @@
   .mode-switch button { flex: 1; padding: 10px 6px; border: none; background: #fff; color: #666; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .mode-switch button.active { background: #2d6a2e; color: #fff; }
   .price-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; min-height: 22px; }
-  .price-label-row label { margin-bottom: 0; white-space: nowrap; }
+  .price-label-row label { margin-bottom: 0; white-space: nowrap; overflow: hidden; min-width: 0; }
   .price-label-row + input { margin-top: auto; }
   .unit-switch { display: inline-flex; border: 1.5px solid #ddd; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
-  .unit-switch button { border: none; background: #fff; color: #888; font-size: 10px; font-weight: 600; padding: 3px 7px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .unit-switch button { border: none; background: #fff; color: #888; font-size: 10px; font-weight: 600; padding: 3px 5px; cursor: pointer; font-family: inherit; white-space: nowrap; }
   .unit-switch button.active { background: #2d6a2e; color: #fff; }
   .jakost-btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .jakost-btns button { padding: 8px 16px; border: 1.5px solid #ddd; background: #fff; color: #555; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: inherit; }
   .jakost-btns button.active { border-color: #2d6a2e; background: #2d6a2e; color: #fff; }
   .jakost-hint { font-size: 11px; color: #b8860b; margin-top: 4px; }
+  .pf-jakost-row { align-items: center; gap: 8px; }
+  .pf-jakost-label { font-size: 12px; font-weight: 600; color: #2d6a2e; }
+  .pf-jakost-row .jakost-btns button { padding: 6px 12px; font-size: 12px; }
+  .pf-jakost-row.off .pf-jakost-label { color: #aaa; }
+  .pf-jakost-row.off .jakost-btns button { background: #f0f0f0; color: #aaa; border-color: #e5e5e5; cursor: default; }
+  .form-group input:disabled { background: #f0f0f0; color: #aaa; }
+  .form-group.dimmed label { color: #aaa; }
   .preset-chip .preset-tag { font-size: 10px; padding: 0 6px; border-left: 1px solid #ddd; color: #888; }
   .app-footer { text-align: center; margin-top: 18px; font-size: 11px; color: #c4c4c4; letter-spacing: 0.3px; line-height: 1.9; }
   .app-footer .footer-guide { color: #7aa87c; text-decoration: none; font-size: 12px; font-weight: 600; }
@@ -250,6 +257,15 @@
       <input type="number" id="newPresetPriceKg" data-i18n-ph="presetPricePh" step="0.01" min="0">
       <input type="text" id="newPresetOrigin" data-i18n-ph="presetOriginPh">
       <input type="text" id="newPresetBarcode" data-i18n-ph="presetBarcodePh" maxlength="20" oninput="onPresetBarcodeInput()">
+    </div>
+    <div class="pf-row pf-jakost-row off" id="pfJakostRow">
+      <span class="pf-jakost-label" data-i18n="pfJakost">Jakost:</span>
+      <div class="jakost-btns" id="pfJakostBtns">
+        <button type="button" data-jk="" class="active" onclick="setPfJakost('')">—</button>
+        <button type="button" data-jk="Extra" onclick="setPfJakost('Extra')">Extra</button>
+        <button type="button" data-jk="I." onclick="setPfJakost('I.')">I.</button>
+        <button type="button" data-jk="II." onclick="setPfJakost('II.')">II.</button>
+      </div>
     </div>
     <div class="pf-row" style="justify-content:flex-start;">
       <label class="pf-toggle" id="pfToggle">
@@ -456,7 +472,7 @@
       expiryDateLabel: '📅 Ngày khác', expiryBtn: 'Tự điền HSD',
       expiryHint: 'Bấm 🍉 = tự điền hạn 3 ngày. Bấm 📅 = mở lịch chọn ngày khác.',
       modePrice: 'Nhãn giá', modeNavod: 'Hướng dẫn',
-      priceLabelKg: 'Giá mỗi kg (Kč)', priceLabelKs: 'Giá mỗi cái (Kč/ks)',
+      priceLabelKg: 'Giá mỗi kg (Kč)', priceLabelKs: 'Giá mỗi cái (Kč)',
       jakostLabel: 'Jakost — hạng chất lượng (bắt buộc với mặt hàng này)',
       jakostHint: 'Mặt hàng này thuộc nhóm bắt buộc ghi hạng chất lượng (SZPI).',
       navodLabel: 'Nội dung hướng dẫn — chữ sẽ chiếm toàn bộ nhãn',
@@ -464,6 +480,9 @@
       navodSave: 'Lưu mẫu', navodHint: 'Font tự co giãn: chữ ít → to, chữ nhiều → nhỏ lại. Xuống dòng được giữ nguyên.',
       needNavod: 'Hãy nhập nội dung hướng dẫn.', navodPresetName: 'Đặt tên cho mẫu này:',
       guideLink: '📖 Hướng dẫn sử dụng',
+      pfJakost: 'Jakost:',
+      jakostRequired: 'Mặt hàng này bắt buộc chọn hạng Jakost (Extra / I. / II.) theo luật SZPI.',
+      jakostConfirm: 'Mặt hàng này theo luật SZPI phải ghi Jakost (Extra / I. / II.).\n\nIn mà không ghi Jakost?',
     },
     cs: {
       htmlLang: 'cs', docTitle: 'Cenovky',
@@ -502,7 +521,7 @@
       expiryDateLabel: '📅 Jiné datum', expiryBtn: 'Doplnit datum',
       expiryHint: '🍉 = doplní „chladu + 3 dny". 📅 = otevře kalendář pro jiné datum.',
       modePrice: 'Cenovky', modeNavod: 'Návod',
-      priceLabelKg: 'Cena za kg (Kč)', priceLabelKs: 'Cena za kus (Kč/ks)',
+      priceLabelKg: 'Cena za kg (Kč)', priceLabelKs: 'Cena za kus (Kč)',
       jakostLabel: 'Jakost — třída jakosti (u této položky povinná)',
       jakostHint: 'Tato položka podléhá zvláštní obchodní normě (SZPI) — jakost je povinná.',
       navodLabel: 'Text návodu — vyplní celou etiketu',
@@ -510,6 +529,9 @@
       navodSave: 'Uložit šablonu', navodHint: 'Písmo se přizpůsobí: málo textu → velké, hodně textu → menší. Řádkování zůstane.',
       needNavod: 'Vyplňte text návodu.', navodPresetName: 'Název šablony:',
       guideLink: '📖 Návod k použití',
+      pfJakost: 'Jakost:',
+      jakostRequired: 'U této položky je třída jakosti (Extra / I. / II.) povinná dle SZPI.',
+      jakostConfirm: 'U této položky je jakost ze zákona povinná (Extra / I. / II.).\n\nTisknout bez jakosti?',
     }
   };
 
@@ -545,9 +567,9 @@
     try {
       const s = JSON.parse(store.get('etikety_presets'));
       // preset = [name, origin, barcode, priceKg, mode('kg'|'ks'|'navod'), navodText]
-      if (Array.isArray(s)) return s.map(p => [p[0], p[1] || '', (p[2] !== undefined) ? p[2] : suggestBarcodeFromName(p[0], []), (p[3] !== undefined) ? p[3] : '', p[4] || 'kg', p[5] || '']);
+      if (Array.isArray(s)) return s.map(p => [p[0], p[1] || '', (p[2] !== undefined) ? p[2] : suggestBarcodeFromName(p[0], []), (p[3] !== undefined) ? p[3] : '', p[4] || 'kg', p[5] || '', p[6] || '']);
     } catch (e) {}
-    return DEFAULT_PRESETS.map(p => [p[0], p[1], p[2], p[3] || '', 'kg', '']);
+    return DEFAULT_PRESETS.map(p => [p[0], p[1], p[2], p[3] || '', 'kg', '', '']);
   }
   function savePresets() { store.set('etikety_presets', JSON.stringify(presets)); }
 
@@ -580,8 +602,11 @@
     document.getElementById('unitKg').classList.toggle('active', !isKs);
     document.getElementById('unitKs').classList.toggle('active', isKs);
     document.getElementById('priceLabel').textContent = isKs ? L.priceLabelKs : L.priceLabelKg;
-    document.getElementById('grpWeight').style.display = isKs ? 'none' : '';
-    document.getElementById('rowAuto').style.display = isKs ? 'none' : '';
+    // Keep the layout fixed: in ks mode the weight field is dimmed+locked (not hidden),
+    // so the kg/ks switch never moves.
+    document.getElementById('fweight').disabled = isKs;
+    document.getElementById('grpWeight').classList.toggle('dimmed', isKs);
+    autoCalc();
   }
 
   // ===== JAKOST (EU specific marketing standards — quality class required) =====
@@ -600,6 +625,21 @@
     document.getElementById('rowJakost').style.display = show ? '' : 'none';
     if (!show) setJakost('');
     checkNote();
+  }
+
+  // Jakost inside the "+Thêm" preset form: enabled only when the name matches
+  // a jakost-mandatory item; otherwise grayed out like the barcode-off state.
+  let pfJakost = '';
+  function pfJakostEnabled() { return needsJakost(document.getElementById('newPresetName').value); }
+  function setPfJakost(v) {
+    if (!pfJakostEnabled() && v) return;
+    pfJakost = v;
+    document.querySelectorAll('#pfJakostBtns button').forEach(b => b.classList.toggle('active', b.getAttribute('data-jk') === v));
+  }
+  function updatePfJakostState() {
+    const on = pfJakostEnabled();
+    document.getElementById('pfJakostRow').classList.toggle('off', !on);
+    if (!on) setPfJakost('');
   }
 
   // ===== INIT / LANGUAGE =====
@@ -709,6 +749,7 @@
     document.getElementById('fname').value = p[0];
     document.getElementById('forigin').value = p[1];
     onNameInput();
+    if (p[6] && needsJakost(p[0])) setJakost(p[6]);
     if (p[3]) {
       document.getElementById('fpricekg').value = p[3];
       autoCalc();
@@ -749,6 +790,7 @@
   }
   let barcodeSuggested = true; // flag: input still showing suggestion
   function onPresetNameInput() {
+    updatePfJakostState();
     if (!barcodeSuggested) return;
     if (!document.getElementById('newPresetUseBC').checked) return;
     const name = document.getElementById('newPresetName').value;
@@ -824,6 +866,8 @@
       document.getElementById('pfToggleLabel').textContent = L.useBarcode;
       barcodeSuggested = true;
       updatePresetHint();
+      setPfJakost('');
+      updatePfJakostState();
       document.getElementById('newPresetName').focus();
     }
   }
@@ -842,14 +886,15 @@
     } else {
       bc = '';
     }
-    presets.push([name, origin, bc, priceKgRaw, priceMode, '']); savePresets(); renderPresets(); toggleAddPreset(false);
+    if (needsJakost(name) && !pfJakost) { alert(L.jakostRequired); return; }
+    presets.push([name, origin, bc, priceKgRaw, priceMode, '', pfJakost]); savePresets(); renderPresets(); toggleAddPreset(false);
   }
   function saveNavodPreset() {
     const text = document.getElementById('fnavod').value.trim();
     if (!text) { alert(L.needNavod); return; }
     const name = (prompt(L.navodPresetName, text.split('\n')[0].slice(0, 20)) || '').trim();
     if (!name) return;
-    presets.push([name, '', '', '', 'navod', text]); savePresets(); renderPresets();
+    presets.push([name, '', '', '', 'navod', text, '']); savePresets(); renderPresets();
   }
   function getBarcodeForName(name) {
     const p = presets.find(x => x[0].toLowerCase() === (name || '').toLowerCase());
@@ -863,6 +908,7 @@
     const weight = parseFloat(document.getElementById('fweight').value);
     const elKus = document.getElementById('autoPriceKus');
     const el100g = document.getElementById('autoPrice100g');
+    if (priceMode === 'ks') { elKus.textContent = '—'; el100g.textContent = '—'; return; }
     if (!isNaN(priceKg) && !isNaN(weight) && weight > 0 && priceKg > 0) {
       elKus.textContent = formatCzech(priceKg * weight) + ' Kč';
       el100g.textContent = formatCzech(priceKg / 10) + ' Kč';
@@ -897,6 +943,7 @@
     if (!name) { alert(L.needName); return; }
     if (!isKs && (isNaN(weight) || weight <= 0)) { alert(L.needWeight); return; }
     if (isNaN(priceKg) || priceKg <= 0) { alert(L.needPrice); return; }
+    if (needsJakost(name) && !jakost) { if (!confirm(L.jakostConfirm)) return; }
 
     if (note.length > cfg.noteMax) {
       alert(`${L.noteExceedPrefix} ${note.length}/${cfg.noteMax} ${L.noteExceedSuffix}`);
