@@ -1154,12 +1154,10 @@
       const originFit = fitFont(originText, 20, originFont, 4);
       const bcCell = `<div style="width:${cfg.bcW}mm;height:${cfg.bcH}mm;flex-shrink:0;"><svg data-bc="${esc(l.barcode)}" style="width:100%;height:100%;display:block;" preserveAspectRatio="none"></svg></div>`;
       const jkSmall = l.jakost ? `<div style="color:#333;font-size:${detFont}pt;line-height:1.2;width:62%;">Třída: ${esc(l.jakost)}</div>` : '';
-      // ks (fixed price): no weight/kg/100g rows — barcode shares the big-price row.
+      // ks (fixed price): no weight/kg/100g rows — price on its own line, barcode on the row below.
       const midRows = isKs
-        ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:2mm;margin-top:0.6mm;">
-            <div style="font-weight:800;font-size:${priceFont}pt;line-height:1.05;white-space:nowrap;">${formatCzech(l.price)} Kč/ks</div>
-            ${bcCell}
-          </div>`
+        ? `<div style="font-weight:800;font-size:${priceFont}pt;line-height:1.05;white-space:nowrap;margin-top:0.6mm;">${formatCzech(l.price)} Kč/ks</div>
+          <div style="margin-top:0.5mm;">${bcCell}</div>`
         : `<div style="display:grid;grid-template-columns:max-content max-content;column-gap:2mm;row-gap:0;font-size:${detFont}pt;line-height:1.2;color:#333;width:62%;">
             <span>Hmotnost</span><span>${formatCzech(l.weight)} kg</span>
             <span>Cena za kg</span><span>${formatCzech(l.priceKg)} Kč</span>
