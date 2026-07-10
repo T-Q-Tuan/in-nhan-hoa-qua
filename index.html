@@ -577,7 +577,8 @@
 
   // ===== APP MODE (price labels / návod) & PRICE MODE (per kg / per kus) =====
   let appMode = (store.get('etikety_mode') === 'navod') ? 'navod' : 'price';
-  let priceMode = (store.get('etikety_pricemode') === 'ks') ? 'ks' : 'kg';
+  // Kč/kg is always the default on load — this choice isn't remembered between visits.
+  let priceMode = 'kg';
   let jakost = '';
 
   function setMode(m) {
@@ -587,7 +588,6 @@
   }
   function setPriceMode(pm) {
     priceMode = (pm === 'ks') ? 'ks' : 'kg';
-    store.set('etikety_pricemode', priceMode);
     updateModeUI();
   }
   function updateModeUI() {
